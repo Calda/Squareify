@@ -13,6 +13,8 @@
 		2E3299861A6318AC00991FD3 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2E3299851A6318AC00991FD3 /* Images.xcassets */; };
 		2E3299891A6318AC00991FD3 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2E3299871A6318AC00991FD3 /* LaunchScreen.xib */; };
 		2E3299951A6318AC00991FD3 /* SquareifyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E3299941A6318AC00991FD3 /* SquareifyTests.swift */; };
+		2E3299A31A632C0600991FD3 /* VideoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E3299A21A632C0600991FD3 /* VideoViewController.swift */; };
+		2E3299A51A632D5200991FD3 /* screenshot 19.png in Resources */ = {isa = PBXBuildFile; fileRef = 2E3299A41A632D5200991FD3 /* screenshot 19.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,6 +38,8 @@
 		2E32998E1A6318AC00991FD3 /* SquareifyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SquareifyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2E3299931A6318AC00991FD3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2E3299941A6318AC00991FD3 /* SquareifyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquareifyTests.swift; sourceTree = "<group>"; };
+		2E3299A21A632C0600991FD3 /* VideoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoViewController.swift; sourceTree = "<group>"; };
+		2E3299A41A632D5200991FD3 /* screenshot 19.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "screenshot 19.png"; path = "../../../../Pictures/Screenshots/screenshot 19.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,6 +84,7 @@
 				2E32997E1A6318AC00991FD3 /* AppDelegate.swift */,
 				2E3299801A6318AC00991FD3 /* ViewController.swift */,
 				2E3299821A6318AC00991FD3 /* Main.storyboard */,
+				2E3299A21A632C0600991FD3 /* VideoViewController.swift */,
 				2E3299851A6318AC00991FD3 /* Images.xcassets */,
 				2E3299871A6318AC00991FD3 /* LaunchScreen.xib */,
 				2E32997C1A6318AC00991FD3 /* Supporting Files */,
@@ -90,6 +95,7 @@
 		2E32997C1A6318AC00991FD3 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				2E3299A41A632D5200991FD3 /* screenshot 19.png */,
 				2E32997D1A6318AC00991FD3 /* Info.plist */,
 			);
 			name = "Supporting Files";
@@ -193,6 +199,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2E3299841A6318AC00991FD3 /* Main.storyboard in Resources */,
+				2E3299A51A632D5200991FD3 /* screenshot 19.png in Resources */,
 				2E3299891A6318AC00991FD3 /* LaunchScreen.xib in Resources */,
 				2E3299861A6318AC00991FD3 /* Images.xcassets in Resources */,
 			);
@@ -214,6 +221,7 @@
 			files = (
 				2E3299811A6318AC00991FD3 /* ViewController.swift in Sources */,
 				2E32997F1A6318AC00991FD3 /* AppDelegate.swift in Sources */,
+				2E3299A31A632C0600991FD3 /* VideoViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -405,6 +413,7 @@
 				2E32999A1A6318AC00991FD3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		2E32999B1A6318AC00991FD3 /* Build configuration list for PBXNativeTarget "SquareifyTests" */ = {
 			isa = XCConfigurationList;
@@ -413,6 +422,7 @@
 				2E32999D1A6318AC00991FD3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
