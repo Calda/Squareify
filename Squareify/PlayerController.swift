@@ -1,5 +1,5 @@
 //
-//  VideoViewController.swift
+//  PlayerController.swift
 //  Squareify
 //
 //  Created by Cal on 1/11/15.
@@ -7,9 +7,12 @@
 //
 
 import Foundation
-import UIKit
 import AVKit
+import UIKit
+import AVFoundation
 
-class VideoViewController : AVPlayerViewController {
+class PlayerController : AVPlayerViewController {
+    
+    
     
 }

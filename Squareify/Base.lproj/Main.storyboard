@@ -2,7 +2,6 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6254" systemVersion="14A388b" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="vXZ-lx-hvc">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6247"/>
-        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
     </dependencies>
     <scenes>
         <!--View Controller-->
@@ -17,9 +16,12 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" image="screenshot 19.png" translatesAutoresizingMaskIntoConstraints="NO" id="bla-gv-yYe">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                            </imageView>
+                            <containerView opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fGb-Uv-yT5">
+                                <rect key="frame" x="0.0" y="-9" width="375" height="685"/>
+                                <connections>
+                                    <segue destination="Xqc-b9-8SV" kind="embed" identifier="showMovie" id="0HO-l4-KHb"/>
+                                </connections>
+                            </containerView>
                             <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="SCA-qk-FKi">
                                 <rect key="frame" x="0.0" y="-229" width="375" height="1125"/>
                                 <subviews>
@@ -37,16 +39,6 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <gestureRecognizers/>
-                        <constraints>
-                            <constraint firstAttribute="height" secondItem="bla-gv-yYe" secondAttribute="height" id="8Ew-Ue-UbB"/>
-                            <constraint firstAttribute="width" secondItem="bla-gv-yYe" secondAttribute="height" multiplier="375:128" id="ogv-Ao-Zn9"/>
-                            <constraint firstAttribute="width" secondItem="bla-gv-yYe" secondAttribute="width" id="qOm-cF-F08"/>
-                        </constraints>
-                        <variation key="default">
-                            <mask key="constraints">
-                                <exclude reference="ogv-Ao-Zn9"/>
-                            </mask>
-                        </variation>
                     </view>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
                     <connections>
@@ -56,10 +48,17 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="261.5" y="204.5"/>
+            <point key="canvasLocation" x="-29.5" y="140.5"/>
+        </scene>
+        <!--AV Player View Controller-->
+        <scene sceneID="0Jy-0R-abR">
+            <objects>
+                <avPlayerViewController videoGravity="AVLayerVideoGravityResizeAspect" id="Xqc-b9-8SV" sceneMemberID="viewController">
+                    <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
+                </avPlayerViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Nxm-19-VI0" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="431.5" y="140.5"/>
         </scene>
     </scenes>
-    <resources>
-        <image name="screenshot 19.png" width="498" height="888"/>
-    </resources>
 </document>

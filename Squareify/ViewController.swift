@@ -8,6 +8,7 @@
 
 import UIKit
 import AVKit
+import AVFoundation
 
 class ViewController: UIViewController {
 
@@ -56,5 +57,11 @@ class ViewController: UIViewController {
         movingSquare.frame.origin.y = newY
     }
     
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier? == "showMovie" {
+            let playerController = segue.destinationViewController as AVPlayerViewController
+            playerController.player = AVPlayer(URL: NSBundle.mainBundle().URLForResource("testvideo", withExtension: "mov"))
+        }
+    }
 }
 
