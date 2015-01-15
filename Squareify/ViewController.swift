@@ -16,7 +16,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var movingSquare: UIView!
     @IBOutlet weak var movingVideo: UIView!
     var previousTranslation : CGFloat = 0
-    var translations : [(time: NSTimeInterval, delaTranslation: CGFloat)] = []
+    var keyframes : [(time: NSTimeInterval, position: CGFloat)] = []
     var videoIsPlaying = true
     
     override func viewDidLoad() {
@@ -25,7 +25,8 @@ class ViewController: UIViewController {
     }
     
     override func viewDidAppear(animated: Bool) {
-        translations.append(time: NSDate().timeIntervalSince1970, delaTranslation: CGFloat(0))
+        let initialPosition = movingSquare.frame.origin.y
+        keyframes.append(time: NSDate().timeIntervalSince1970, position: initialPosition)
     }
 
     override func didReceiveMemoryWarning() {
@@ -37,6 +38,7 @@ class ViewController: UIViewController {
         if videoIsPlaying {
             let translation = sender.translationInView(self.view).y
             let deltaTranslation = translation - previousTranslation
+            let position = sender.locationInView(self.view)
             if abs(deltaTranslation) < 20 {
                 updateSelectionPosition(deltaTranslation)
             } else if abs(sender.velocityInView(self.view).y) > 800 {
@@ -63,7 +65,7 @@ class ViewController: UIViewController {
         }
         
         movingSquare.frame.origin.y = newY
-        translations.append(time: NSDate().timeIntervalSince1970, delaTranslation: deltaY)
+        keyframes.append(time: NSDate().timeIntervalSince1970, position: CGFloat(newY))
         
     }
     
@@ -71,7 +73,7 @@ class ViewController: UIViewController {
         videoIsPlaying = false
         println("video finished playing")
         exportVideo()
-        println(translations)
+        println(keyframes)
     }
     
     func exportVideo() {
@@ -85,18 +87,22 @@ class ViewController: UIViewController {
         let instruction = AVMutableVideoCompositionInstruction()
         instruction.timeRange = CMTimeRangeMake(kCMTimeZero, CMTimeMakeWithSeconds(60, 30))
         
+        let positionRatio = clipVideoTrack.naturalSize.height / self.view.frame.height
+        func correctPosition(position : CGFloat) -> CGFloat {
+            return -(position + self.view.frame.width) * positionRatio
+        }
+        
         let transformer = AVMutableVideoCompositionLayerInstruction(assetTrack: clipVideoTrack)
         let squareSize = Int(clipVideoTrack.naturalSize.width)
         let squareOffsetFromTop : CGFloat = -CGFloat((Int(clipVideoTrack.naturalSize.height) - squareSize)/2)
-        var previous = (keyframe: translations[0], transform: CGAffineTransformMakeTranslation(0, squareOffsetFromTop))
-        var initialTime = translations[0].time
+        var previous = (keyframe: keyframes[0], transform: CGAffineTransformMakeTranslation(0, correctPosition(keyframes[0].position)))
+        var initialTime = keyframes[0].time
         transformer.setTransform(previous.transform, atTime: CMTimeMake(0, 30))
-        for (time, deltaTranslation) in translations {
-            let previousY = previous.transform.ty
-            let transformation = CGAffineTransformMakeTranslation(0, previousY - deltaTranslation)
+        for (time, position) in keyframes {
+            let transformation = CGAffineTransformMakeTranslation(0, correctPosition(position))
             let deltaTime = Double(time - initialTime)
-            transformer.setTransform(transformation, atTime: CMTimeMake(Int64(deltaTime * 1000), 1000))
-            previous = ((time, deltaTranslation), transformation)
+            transformer.setTransform(transformation, atTime: CMTimeMake(Int64(deltaTime * 10000), 10000))
+            previous = ((time, position), transformation)
         }
         
         instruction.layerInstructions = NSArray(object: transformer)
