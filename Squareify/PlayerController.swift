@@ -13,6 +13,8 @@ import AVFoundation
 
 class PlayerController : AVPlayerViewController {
     
-    
+    override func viewDidAppear(animated: Bool) {
+        player.play()
+    }
     
 }

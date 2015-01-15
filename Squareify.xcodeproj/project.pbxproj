@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		2E0807CA1A638080001B007E /* PlayerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E0807C91A638080001B007E /* PlayerController.swift */; };
 		2E0807CC1A63809E001B007E /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E0807CB1A63809E001B007E /* AVKit.framework */; };
-		2E0807CE1A638217001B007E /* testvideo.mov in Resources */ = {isa = PBXBuildFile; fileRef = 2E0807CD1A638217001B007E /* testvideo.mov */; };
 		2E32997F1A6318AC00991FD3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E32997E1A6318AC00991FD3 /* AppDelegate.swift */; };
 		2E3299811A6318AC00991FD3 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E3299801A6318AC00991FD3 /* ViewController.swift */; };
 		2E3299841A6318AC00991FD3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2E3299821A6318AC00991FD3 /* Main.storyboard */; };
@@ -17,6 +16,10 @@
 		2E3299891A6318AC00991FD3 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2E3299871A6318AC00991FD3 /* LaunchScreen.xib */; };
 		2E3299951A6318AC00991FD3 /* SquareifyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E3299941A6318AC00991FD3 /* SquareifyTests.swift */; };
 		2E3299A51A632D5200991FD3 /* screenshot 19.png in Resources */ = {isa = PBXBuildFile; fileRef = 2E3299A41A632D5200991FD3 /* screenshot 19.png */; };
+		2E8546981A64B2BA00F5FAEB /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E8546971A64B2BA00F5FAEB /* CoreMedia.framework */; };
+		2E85469A1A64B2CA00F5FAEB /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E8546991A64B2CA00F5FAEB /* AVFoundation.framework */; };
+		2E85469C1A64B2D400F5FAEB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E85469B1A64B2D400F5FAEB /* QuartzCore.framework */; };
+		2E95F1C71A673D78009BD74F /* testvideo.mov in Resources */ = {isa = PBXBuildFile; fileRef = 2E95F1C61A673D78009BD74F /* testvideo.mov */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,7 +35,6 @@
 /* Begin PBXFileReference section */
 		2E0807C91A638080001B007E /* PlayerController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerController.swift; sourceTree = "<group>"; };
 		2E0807CB1A63809E001B007E /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
-		2E0807CD1A638217001B007E /* testvideo.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; name = testvideo.mov; path = ../../../../Desktop/testvideo.mov; sourceTree = "<group>"; };
 		2E3299791A6318AC00991FD3 /* Squareify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Squareify.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2E32997D1A6318AC00991FD3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2E32997E1A6318AC00991FD3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -44,6 +46,10 @@
 		2E3299931A6318AC00991FD3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2E3299941A6318AC00991FD3 /* SquareifyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquareifyTests.swift; sourceTree = "<group>"; };
 		2E3299A41A632D5200991FD3 /* screenshot 19.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "screenshot 19.png"; path = "../../../../Pictures/Screenshots/screenshot 19.png"; sourceTree = "<group>"; };
+		2E8546971A64B2BA00F5FAEB /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		2E8546991A64B2CA00F5FAEB /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		2E85469B1A64B2D400F5FAEB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		2E95F1C61A673D78009BD74F /* testvideo.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = testvideo.mov; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +57,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2E85469C1A64B2D400F5FAEB /* QuartzCore.framework in Frameworks */,
+				2E85469A1A64B2CA00F5FAEB /* AVFoundation.framework in Frameworks */,
+				2E8546981A64B2BA00F5FAEB /* CoreMedia.framework in Frameworks */,
 				2E0807CC1A63809E001B007E /* AVKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -68,6 +77,9 @@
 		2E3299701A6318AC00991FD3 = {
 			isa = PBXGroup;
 			children = (
+				2E85469B1A64B2D400F5FAEB /* QuartzCore.framework */,
+				2E8546991A64B2CA00F5FAEB /* AVFoundation.framework */,
+				2E8546971A64B2BA00F5FAEB /* CoreMedia.framework */,
 				2E0807CB1A63809E001B007E /* AVKit.framework */,
 				2E32997B1A6318AC00991FD3 /* Squareify */,
 				2E3299911A6318AC00991FD3 /* SquareifyTests */,
@@ -101,7 +113,7 @@
 		2E32997C1A6318AC00991FD3 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				2E0807CD1A638217001B007E /* testvideo.mov */,
+				2E95F1C61A673D78009BD74F /* testvideo.mov */,
 				2E3299A41A632D5200991FD3 /* screenshot 19.png */,
 				2E32997D1A6318AC00991FD3 /* Info.plist */,
 			);
@@ -205,7 +217,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2E0807CE1A638217001B007E /* testvideo.mov in Resources */,
+				2E95F1C71A673D78009BD74F /* testvideo.mov in Resources */,
 				2E3299841A6318AC00991FD3 /* Main.storyboard in Resources */,
 				2E3299A51A632D5200991FD3 /* screenshot 19.png in Resources */,
 				2E3299891A6318AC00991FD3 /* LaunchScreen.xib in Resources */,

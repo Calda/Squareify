@@ -39,21 +39,30 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <gestureRecognizers/>
+                        <connections>
+                            <outletCollection property="gestureRecognizers" destination="exa-MZ-1jC" appends="YES" id="5xu-d0-iXw"/>
+                        </connections>
                     </view>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
                     <connections>
                         <outlet property="movingSquare" destination="SCA-qk-FKi" id="Rk2-3e-ya6"/>
+                        <outlet property="movingVideo" destination="fGb-Uv-yT5" id="GHv-hy-Wls"/>
                         <outlet property="view" destination="kh9-bI-dsS" id="HUP-6A-6Cn"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
+                <panGestureRecognizer delaysTouchesEnded="NO" minimumNumberOfTouches="1" id="exa-MZ-1jC">
+                    <connections>
+                        <action selector="panAction:" destination="vXZ-lx-hvc" id="hF9-AZ-nMj"/>
+                    </connections>
+                </panGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="-29.5" y="140.5"/>
+            <point key="canvasLocation" x="-29.5" y="104.5"/>
         </scene>
         <!--AV Player View Controller-->
         <scene sceneID="0Jy-0R-abR">
             <objects>
-                <avPlayerViewController videoGravity="AVLayerVideoGravityResizeAspect" id="Xqc-b9-8SV" sceneMemberID="viewController">
+                <avPlayerViewController videoGravity="AVLayerVideoGravityResizeAspect" id="Xqc-b9-8SV" customClass="PlayerController" customModule="Squareify" customModuleProvider="target" sceneMemberID="viewController">
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
                 </avPlayerViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Nxm-19-VI0" userLabel="First Responder" sceneMemberID="firstResponder"/>
