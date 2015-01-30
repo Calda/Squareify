@@ -11,7 +11,7 @@ import AVKit
 import AVFoundation
 import Foundation
 
-class ViewController: UIViewController {
+class EditorController: UIViewController {
 
     @IBOutlet weak var movingSquare: UIView!
     @IBOutlet weak var movingVideo: UIView!
