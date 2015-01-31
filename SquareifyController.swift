@@ -16,6 +16,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBOutlet weak var pickerController: UICollectionView!
     @IBOutlet weak var playerContainer: UIView!
     @IBOutlet weak var adBanner: ADBannerView!
+    @IBOutlet weak var welcomeView: UIView!
     
     var fetch : PHFetchResult?
     let imageManager = PHImageManager()
@@ -45,6 +46,30 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         pickerController.reloadData()
     }
     
+    //displays user selected video, unselects previous
+    var currentSelected : NSIndexPath?
+    
+    func selectAndDisplay(index: NSIndexPath) {
+        if let previousIndex = currentSelected {
+            let previousCell = pickerController.cellForItemAtIndexPath(previousIndex) as PickerCell?
+            previousCell?.deselectCell()
+        }
+        let currentCell = pickerController.cellForItemAtIndexPath(index) as PickerCell?
+        currentCell?.selectCell()
+        currentSelected = index
+        
+        let index = index.indexAtPosition(1)
+        if let asset = fetch?.objectAtIndex(index) as? PHAsset {
+            imageManager.requestAVAssetForVideo(asset, options: nil, resultHandler: { video, audio, info in
+                self.playerController?.player = AVPlayer(playerItem: AVPlayerItem(asset: video))
+                self.playerController?.videoGravity = "AVLayerVideoGravityResizeAspectFill"
+                self.playerController?.player.play()
+            })
+            playerContainer.hidden = false
+            welcomeView.hidden = true
+        }
+    }
+    
     //setup embeded viewer
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier? == "embedViewer" {
@@ -71,7 +96,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PickerCell", forIndexPath: indexPath) as PickerCell
-        cell.backgroundColor = UIColor.blackColor()
         
         let index = indexPath.indexAtPosition(1)
         if let asset = fetch?.objectAtIndex(index) as? PHAsset {
@@ -101,52 +125,39 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     }
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-        if let cell = collectionView.cellForItemAtIndexPath(indexPath) as? PickerCell {
-            cell.blurEffect.hidden = false
-        }
-        let index = indexPath.indexAtPosition(1)
-        if let asset = fetch?.objectAtIndex(index) as? PHAsset {
-            imageManager.requestAVAssetForVideo(asset, options: nil, resultHandler: { video, audio, info in
-                self.playerController?.player = AVPlayer(playerItem: AVPlayerItem(asset: video))
-                self.playerController?.player.play()
-                self.playerController?.videoGravity = "AVLayerVideoGravityResizeAspectFill"
-                self.playerController?.player
-            })
-            playerContainer.hidden = false
-        }
+        println("new selection")
+        self.selectAndDisplay(indexPath)
     }
     
     func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
-        if let cell = collectionView.cellForItemAtIndexPath(indexPath) as? PickerCell {
-            cell.blurEffect.hidden = true
-        }
+        println("deelection")
+        let pickerCell = pickerController.cellForItemAtIndexPath(indexPath) as PickerCell
+        pickerCell.deselectCell()
     }
     
     /**
-    * Ad Delegate
+    * Ad Delegate - bring the banner on screen when it has an ad to display, move off when it doesn't
     */
     
     var bannerStarts : [ADBannerView : CGPoint] = [:]
     
     func bannerViewDidLoadAd(banner: ADBannerView!) {
-        println(banner)
-        if bannerStarts[banner] == nil {
+        if bannerStarts[banner] == nil || bannerStarts[banner] == banner.frame.origin {
             bannerStarts.updateValue(banner.frame.origin, forKey: banner)
             
             let height = banner.frame.height
             let newPosition = CGPointMake(banner.frame.origin.x, banner.frame.origin.y - height)
-            UIView.animateWithDuration(1.0, animations: {
+            UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
                 banner.frame.origin = newPosition
-            })
+                }, completion: nil)
         }
     }
     
     func bannerView(banner: ADBannerView!, didFailToReceiveAdWithError error: NSError!) {
-        println(banner)
         if let start = bannerStarts[banner] {
-            UIView.animateWithDuration(1.0, animations: {
+            UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
                 banner.frame.origin = start
-            })
+            }, completion: nil)
         }
     }
     

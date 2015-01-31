@@ -10,7 +10,6 @@ import UIKit
 
 class PickerCell: UICollectionViewCell {
     
-    @IBOutlet weak var blurEffect: UIVisualEffectView!
     @IBOutlet weak var timeLabel: UILabel!
     @IBOutlet weak var thumbnail: UIImageView!
     
@@ -21,6 +20,20 @@ class PickerCell: UICollectionViewCell {
             let secondsString = (seconds < 10 ? "0" : "") + "\(seconds)"
             timeLabel.text = "\(minutes):\(secondsString)"
         }
+    }
+    
+    @IBAction func nextButtonPressed(sender: AnyObject) {
+        println("NEXT!")
+    }
+    
+    func selectCell() {
+        println("animating selection")
+        thumbnail.alpha = 0.5
+    }
+    
+    func deselectCell() {
+        println("animating deselection")
+        thumbnail.alpha = 1
     }
     
 }
