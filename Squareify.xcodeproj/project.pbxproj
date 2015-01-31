@@ -24,6 +24,7 @@
 		2E85469C1A64B2D400F5FAEB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E85469B1A64B2D400F5FAEB /* QuartzCore.framework */; };
 		2E95F1C71A673D78009BD74F /* testvideo.mov in Resources */ = {isa = PBXBuildFile; fileRef = 2E95F1C61A673D78009BD74F /* testvideo.mov */; };
 		2EAA60741A7AF8BD008B3118 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAA60731A7AF8BD008B3118 /* Photos.framework */; };
+		2ECA4AD01A7C6F6000ACB280 /* icon style mask 2.png in Resources */ = {isa = PBXBuildFile; fileRef = 2ECA4ACF1A7C6F6000ACB280 /* icon style mask 2.png */; };
 		2EDC8A741A7B0CC40085EE38 /* PickerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EDC8A731A7B0CC40085EE38 /* PickerCell.swift */; };
 		2EECCFEC1A749936003B4CF9 /* SquareifyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EECCFEB1A749936003B4CF9 /* SquareifyController.swift */; };
 /* End PBXBuildFile section */
@@ -60,6 +61,7 @@
 		2E85469B1A64B2D400F5FAEB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		2E95F1C61A673D78009BD74F /* testvideo.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = testvideo.mov; sourceTree = "<group>"; };
 		2EAA60731A7AF8BD008B3118 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
+		2ECA4ACF1A7C6F6000ACB280 /* icon style mask 2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "icon style mask 2.png"; path = "../../../../Downloads/icon style mask 2.png"; sourceTree = "<group>"; };
 		2EDC8A731A7B0CC40085EE38 /* PickerCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PickerCell.swift; sourceTree = "<group>"; };
 		2EECCFEB1A749936003B4CF9 /* SquareifyController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SquareifyController.swift; path = ../SquareifyController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -132,6 +134,7 @@
 			children = (
 				2E3C06EE1A6C4E670053E07C /* green-nature-dual-monitor-other.jpg */,
 				2E3C06EC1A6C4DE00053E07C /* icon style mask.png */,
+				2ECA4ACF1A7C6F6000ACB280 /* icon style mask 2.png */,
 				2E95F1C61A673D78009BD74F /* testvideo.mov */,
 				2E3299A41A632D5200991FD3 /* screenshot 19.png */,
 				2E32997D1A6318AC00991FD3 /* Info.plist */,
@@ -237,6 +240,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2ECA4AD01A7C6F6000ACB280 /* icon style mask 2.png in Resources */,
 				2E95F1C71A673D78009BD74F /* testvideo.mov in Resources */,
 				2E3299841A6318AC00991FD3 /* Main.storyboard in Resources */,
 				2E3C06EF1A6C4E670053E07C /* green-nature-dual-monitor-other.jpg in Resources */,

@@ -9,11 +9,13 @@
 import UIKit
 import Photos
 import AVKit
+import iAd
 
-class SquareifyController : UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+class SquareifyController : UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, ADBannerViewDelegate {
     
     @IBOutlet weak var pickerController: UICollectionView!
     @IBOutlet weak var playerContainer: UIView!
+    @IBOutlet weak var adBanner: ADBannerView!
     
     var fetch : PHFetchResult?
     let imageManager = PHImageManager()
@@ -39,6 +41,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         videoOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
         fetch = PHAsset.fetchAssetsWithMediaType(PHAssetMediaType.Video, options: videoOptions)
         println(fetch)
+        self.automaticallyAdjustsScrollViewInsets = false
         pickerController.reloadData()
     }
     
@@ -105,9 +108,9 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         if let asset = fetch?.objectAtIndex(index) as? PHAsset {
             imageManager.requestAVAssetForVideo(asset, options: nil, resultHandler: { video, audio, info in
                 self.playerController?.player = AVPlayer(playerItem: AVPlayerItem(asset: video))
-                println("playing video!?!?!?!")
                 self.playerController?.player.play()
                 self.playerController?.videoGravity = "AVLayerVideoGravityResizeAspectFill"
+                self.playerController?.player
             })
             playerContainer.hidden = false
         }
@@ -116,6 +119,34 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
         if let cell = collectionView.cellForItemAtIndexPath(indexPath) as? PickerCell {
             cell.blurEffect.hidden = true
+        }
+    }
+    
+    /**
+    * Ad Delegate
+    */
+    
+    var bannerStarts : [ADBannerView : CGPoint] = [:]
+    
+    func bannerViewDidLoadAd(banner: ADBannerView!) {
+        println(banner)
+        if bannerStarts[banner] == nil {
+            bannerStarts.updateValue(banner.frame.origin, forKey: banner)
+            
+            let height = banner.frame.height
+            let newPosition = CGPointMake(banner.frame.origin.x, banner.frame.origin.y - height)
+            UIView.animateWithDuration(1.0, animations: {
+                banner.frame.origin = newPosition
+            })
+        }
+    }
+    
+    func bannerView(banner: ADBannerView!, didFailToReceiveAdWithError error: NSError!) {
+        println(banner)
+        if let start = bannerStarts[banner] {
+            UIView.animateWithDuration(1.0, animations: {
+                banner.frame.origin = start
+            })
         }
     }
     
