@@ -27,7 +27,7 @@ class PickerCell: UICollectionViewCell {
     }
     
     func selectCell() {
-        println("animating selection")
+        println("SELECTED! \(self)")
         thumbnail.alpha = 0.5
     }
     

@@ -17,12 +17,30 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBOutlet weak var playerContainer: UIView!
     @IBOutlet weak var adBanner: ADBannerView!
     @IBOutlet weak var welcomeView: UIView!
+    @IBOutlet weak var nextBarButton: UIBarButtonItem!
+    @IBOutlet weak var playerView: UIView!
     
     var fetch : PHFetchResult?
     let imageManager = PHImageManager()
     var playerController : AVPlayerViewController?
     
+    //will change for iPhone 4S support
+    @IBOutlet weak var playerViewAspectConstraint: NSLayoutConstraint!
+    @IBOutlet weak var welcomeText: UILabel!
+    @IBOutlet weak var playerContainerAspectConstraint: NSLayoutConstraint!
+    @IBOutlet weak var playerContainerMarginConstraint: NSLayoutConstraint!
+    
     override func viewWillAppear(animated: Bool) {
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "loopPlayerVideo", name: AVPlayerItemDidPlayToEndTimeNotification, object: nil) //set up video looping
+        
+        let screenAspect = self.view.frame.width / self.view.frame.height
+        if screenAspect > (9.5/16) { //is iPhone 4S
+            println(screenAspect)
+            playerViewAspectConstraint.constant = 100
+            welcomeText.font = UIFont(name: welcomeText!.font.fontName, size: 22)
+            playerContainerAspectConstraint.constant = -20
+            playerContainerMarginConstraint.constant = -40
+        }
         //get photos auth
         let authorization = PHPhotoLibrary.authorizationStatus()
         if authorization == PHAuthorizationStatus.NotDetermined {
@@ -35,6 +53,10 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         else if authorization == PHAuthorizationStatus.Authorized {
             displayVideoThumbnails()
         }
+    }
+    
+    override func viewDidDisappear(animated: Bool) {
+        playerController?.player.pause()
     }
 
     func displayVideoThumbnails(){
@@ -53,6 +75,8 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         if let previousIndex = currentSelected {
             let previousCell = pickerController.cellForItemAtIndexPath(previousIndex) as PickerCell?
             previousCell?.deselectCell()
+        } else { //this is the first video selected
+            nextBarButton.enabled = true
         }
         let currentCell = pickerController.cellForItemAtIndexPath(index) as PickerCell?
         currentCell?.selectCell()
@@ -69,11 +93,18 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             welcomeView.hidden = true
         }
     }
-    
-    //setup embeded viewer
+
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        //setup embeded viewer
         if segue.identifier? == "embedViewer" {
             playerController = (segue.destinationViewController as AVPlayerViewController)
+        }
+        //give data to duration editor
+        if segue.identifier == "pushDurationEditor" {
+            let durationController = (segue.destinationViewController as DurationController)
+            durationController.videoAsset = playerController?.player.currentItem.asset
+            let photoAsset = fetch!.objectAtIndex(currentSelected!.indexAtPosition(1)) as PHAsset
+            durationController.photoAsset = photoAsset
         }
     }
     
@@ -130,9 +161,9 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     }
     
     func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
-        println("deelection")
-        let pickerCell = pickerController.cellForItemAtIndexPath(indexPath) as PickerCell
-        pickerCell.deselectCell()
+        if let pickerCell = (pickerController.cellForItemAtIndexPath(indexPath) as? PickerCell) {
+            pickerCell.deselectCell()
+        }
     }
     
     /**
@@ -158,6 +189,14 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
                 banner.frame.origin = start
             }, completion: nil)
+        }
+    }
+    
+    //called when video ends, if the view is on screen
+    func loopPlayerVideo(){
+        if self.isViewLoaded() && self.view.window != nil {
+            playerController?.player.seekToTime(kCMTimeZero)
+            playerController?.player.play()
         }
     }
     
