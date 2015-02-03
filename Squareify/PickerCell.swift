@@ -22,18 +22,16 @@ class PickerCell: UICollectionViewCell {
         }
     }
     
-    @IBAction func nextButtonPressed(sender: AnyObject) {
-        println("NEXT!")
-    }
-    
     func selectCell() {
-        println("SELECTED! \(self)")
-        thumbnail.alpha = 0.5
+        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.4, options: nil, animations: {
+            self.thumbnail.alpha = 0.5
+        }, completion: nil)
     }
     
     func deselectCell() {
-        println("animating deselection")
-        thumbnail.alpha = 1
+        UIView.animateWithDuration(0.5, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.4, options: nil, animations: {
+            self.thumbnail.alpha = 1
+            }, completion: nil)
     }
     
 }

@@ -17,10 +17,10 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6fM-0Q-KWN" userLabel="Player View">
+                            <view userInteractionEnabled="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6fM-0Q-KWN" userLabel="Player View">
                                 <rect key="frame" x="0.0" y="64" width="320" height="256"/>
                                 <subviews>
-                                    <containerView hidden="YES" opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="q4t-xT-zIb" userLabel="Player Container">
+                                    <containerView hidden="YES" opaque="NO" contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="q4t-xT-zIb" userLabel="Player Container">
                                         <rect key="frame" x="33" y="-35" width="255" height="326"/>
                                         <constraints>
                                             <constraint firstAttribute="width" secondItem="q4t-xT-zIb" secondAttribute="height" multiplier="12.5:16" id="Qrm-K8-y7A"/>
@@ -29,6 +29,9 @@
                                             <segue destination="u0K-Pu-dOF" kind="embed" identifier="embedViewer" id="bwe-Yo-eY4"/>
                                         </connections>
                                     </containerView>
+                                    <imageView userInteractionEnabled="NO" alpha="0.0" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Xhc-Um-8eo" userLabel="Still Frame Viewer">
+                                        <rect key="frame" x="33" y="-35" width="255" height="326"/>
+                                    </imageView>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="style mask with arrow.png" translatesAutoresizingMaskIntoConstraints="NO" id="JTn-eK-26o" userLabel="Style Mask with Arrow">
                                         <rect key="frame" x="0.0" y="0.0" width="320" height="256"/>
                                     </imageView>
@@ -61,7 +64,10 @@
                                 </subviews>
                                 <constraints>
                                     <constraint firstItem="JTn-eK-26o" firstAttribute="leading" secondItem="6fM-0Q-KWN" secondAttribute="leading" id="0mS-iW-R3i"/>
+                                    <constraint firstItem="Xhc-Um-8eo" firstAttribute="leading" secondItem="q4t-xT-zIb" secondAttribute="leading" id="8DO-aE-ucz"/>
+                                    <constraint firstItem="Xhc-Um-8eo" firstAttribute="centerY" secondItem="q4t-xT-zIb" secondAttribute="centerY" id="8Ha-S5-Lqk"/>
                                     <constraint firstAttribute="bottom" secondItem="JTn-eK-26o" secondAttribute="bottom" id="8RC-Un-6mf"/>
+                                    <constraint firstItem="Xhc-Um-8eo" firstAttribute="height" secondItem="q4t-xT-zIb" secondAttribute="height" id="9p5-fh-CdW"/>
                                     <constraint firstItem="VmU-r7-McV" firstAttribute="height" secondItem="JTn-eK-26o" secondAttribute="height" id="CDg-A9-Dau"/>
                                     <constraint firstAttribute="centerX" secondItem="q4t-xT-zIb" secondAttribute="centerX" id="Coh-yt-7gd"/>
                                     <constraint firstItem="VmU-r7-McV" firstAttribute="centerX" secondItem="JTn-eK-26o" secondAttribute="centerX" id="Em9-Eb-38o"/>
@@ -74,6 +80,7 @@
                                     <constraint firstItem="JTn-eK-26o" firstAttribute="centerX" secondItem="q4t-xT-zIb" secondAttribute="centerX" id="WXf-Kx-2IZ"/>
                                     <constraint firstItem="VmU-r7-McV" firstAttribute="centerY" secondItem="JTn-eK-26o" secondAttribute="centerY" id="bNU-Rt-wPm"/>
                                     <constraint firstItem="JTn-eK-26o" firstAttribute="top" secondItem="6fM-0Q-KWN" secondAttribute="top" id="gD4-Hm-FfH"/>
+                                    <constraint firstItem="Xhc-Um-8eo" firstAttribute="width" secondItem="q4t-xT-zIb" secondAttribute="width" id="lxd-D4-x6L"/>
                                     <constraint firstItem="q4t-xT-zIb" firstAttribute="leading" secondItem="6fM-0Q-KWN" secondAttribute="leading" id="rHT-Xz-Y7V"/>
                                     <constraint firstAttribute="width" secondItem="6fM-0Q-KWN" secondAttribute="height" multiplier="1.25:1" id="wCf-by-9qj"/>
                                     <constraint firstItem="VmU-r7-McV" firstAttribute="leading" secondItem="JTn-eK-26o" secondAttribute="leading" id="zhP-De-kSm"/>
@@ -205,12 +212,14 @@
                     <connections>
                         <outlet property="adBanner" destination="K4F-yr-JC9" id="bQb-L2-lVz"/>
                         <outlet property="nextBarButton" destination="a3h-kk-GOO" id="lAU-X1-G3q"/>
-                        <outlet property="pickerController" destination="HHG-qL-iqb" id="PZ6-Fz-WYv"/>
+                        <outlet property="pickerCollection" destination="HHG-qL-iqb" id="MRi-j1-MFr"/>
+                        <outlet property="pickerHolder" destination="TyV-79-edJ" id="jDT-nb-8vE"/>
                         <outlet property="playerContainer" destination="q4t-xT-zIb" id="4FF-MR-3Rx"/>
                         <outlet property="playerContainerAspectConstraint" destination="Qrm-K8-y7A" id="xcV-SM-rVp"/>
                         <outlet property="playerContainerMarginConstraint" destination="LAP-YM-M6J" id="PcT-Zh-GSd"/>
                         <outlet property="playerView" destination="6fM-0Q-KWN" id="pfx-p7-FZk"/>
                         <outlet property="playerViewAspectConstraint" destination="wCf-by-9qj" id="9RV-1w-3Nh"/>
+                        <outlet property="stillFrameViewer" destination="Xhc-Um-8eo" id="QbH-ja-RMc"/>
                         <outlet property="welcomeText" destination="TS0-zo-FMK" id="ZqS-OH-CtY"/>
                         <outlet property="welcomeView" destination="VmU-r7-McV" id="ic2-EW-1vY"/>
                     </connections>
@@ -222,7 +231,6 @@
         <!--Duration-->
         <scene sceneID="gLj-sX-U7t">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="02m-ok-Rx2" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <viewController id="BPM-oZ-gHr" customClass="DurationController" customModule="Squareify" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="9i0-yU-eAl"/>
@@ -269,6 +277,7 @@
                     <nil key="simulatedBottomBarMetrics"/>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
                 </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="02m-ok-Rx2" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="246" y="-675"/>
         </scene>

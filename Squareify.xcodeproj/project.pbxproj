@@ -113,12 +113,12 @@
 		2E32997B1A6318AC00991FD3 /* Squareify */ = {
 			isa = PBXGroup;
 			children = (
+				2E3299821A6318AC00991FD3 /* Main.storyboard */,
 				2E3E65201A7F07CE004D9F55 /* SquareifyController.swift */,
 				2E3E651E1A7F07AC004D9F55 /* DurationController.swift */,
 				2E3299801A6318AC00991FD3 /* EditorController.swift */,
 				2E32997E1A6318AC00991FD3 /* AppDelegate.swift */,
 				2EDC8A731A7B0CC40085EE38 /* PickerCell.swift */,
-				2E3299821A6318AC00991FD3 /* Main.storyboard */,
 				2E3299851A6318AC00991FD3 /* Images.xcassets */,
 				2E3299871A6318AC00991FD3 /* LaunchScreen.xib */,
 				2E32997C1A6318AC00991FD3 /* Supporting Files */,
