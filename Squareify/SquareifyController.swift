@@ -56,6 +56,20 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         else if authorization == PHAuthorizationStatus.Authorized {
             displayVideoThumbnails()
         }
+    
+    }
+    
+    
+    override func viewDidAppear(animated: Bool) {
+        
+        //move ad to start off-screen
+        let screenHeight = self.view.frame.height
+        println(self.adBanner.frame.origin)
+        let offScreenOrigin = CGPointMake(0,screenHeight)
+        UIView.animateWithDuration(1.0, animations: {
+            self.adBanner.frame.origin = offScreenOrigin
+        })
+        println(self.adBanner.frame.origin)
     }
     
     
@@ -208,28 +222,31 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     * Ad Delegate - bring the banner on screen when it has an ad to display, move off when it doesn't
     */
     
-    var bannerStarts : [ADBannerView : CGPoint] = [:]
-    
     func bannerViewDidLoadAd(banner: ADBannerView!) {
-        if bannerStarts[banner] == nil || bannerStarts[banner] == banner.frame.origin {
-            bannerStarts.updateValue(banner.frame.origin, forKey: banner)
+        
+        if banner.hidden {
+            
+            if banner.frame.origin.y < view.frame.height { //banner is currently on screen
+                banner.frame.origin = CGPointMake(0, view.frame.height)
+            }
+            
+            banner.hidden = false
             
             let height = banner.frame.height
             let newBannerPosition = CGPointMake(banner.frame.origin.x, banner.frame.origin.y - height)
+            
             UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
                 banner.frame.origin = newBannerPosition
-            }, completion: nil)
+                }, completion: nil)
         }
     }
     
     
     func bannerView(banner: ADBannerView!, didFailToReceiveAdWithError error: NSError!) {
-        println("ad out")
-        if let start = bannerStarts[banner] {
+        let bannerOffScreen = CGPointMake(0, view.frame.height)
             UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
-                banner.frame.origin = start
-            }, completion: nil)
-        }
+                    banner.frame.origin = bannerOffScreen
+            }, completion: { success in banner.hidden = true })
     }
     
     
