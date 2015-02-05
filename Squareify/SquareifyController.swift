@@ -61,15 +61,12 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     
     override func viewDidAppear(animated: Bool) {
-        
         //move ad to start off-screen
         let screenHeight = self.view.frame.height
-        println(self.adBanner.frame.origin)
         let offScreenOrigin = CGPointMake(0,screenHeight)
         UIView.animateWithDuration(1.0, animations: {
             self.adBanner.frame.origin = offScreenOrigin
         })
-        println(self.adBanner.frame.origin)
     }
     
     
@@ -109,6 +106,8 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             //from experimentation, a negative width value in the transformed dims means the image will need to be rotated
             let orientation: UIImageOrientation = (transformedDims.width < 0 ? .Right : .Up)
             let generator = AVAssetImageGenerator(asset: currentVideoAsset)
+            generator.requestedTimeToleranceAfter = kCMTimeZero
+            generator.requestedTimeToleranceBefore = kCMTimeZero
             let lastPlayedFrame = generator.copyCGImageAtTime(playerController!.player.currentTime(), actualTime: nil, error: nil)
             stillFrameViewer.image = UIImage(CGImage: lastPlayedFrame, scale: 1.0, orientation: orientation)
             stillFrameViewer.alpha = 1
@@ -234,19 +233,25 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             
             let height = banner.frame.height
             let newBannerPosition = CGPointMake(banner.frame.origin.x, banner.frame.origin.y - height)
+            let newPickerSize = CGSizeMake(pickerCollection.frame.width, pickerCollection.frame.height - height)
             
             UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
                 banner.frame.origin = newBannerPosition
+                self.pickerCollection.frame.size = newPickerSize
                 }, completion: nil)
         }
     }
     
     
     func bannerView(banner: ADBannerView!, didFailToReceiveAdWithError error: NSError!) {
-        let bannerOffScreen = CGPointMake(0, view.frame.height)
+        if !banner.hidden {
+            let bannerOffScreen = CGPointMake(0, view.frame.height)
+            let newPickerSize = CGSizeMake(pickerCollection.frame.width, pickerCollection.frame.height + banner.frame.height)
             UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
-                    banner.frame.origin = bannerOffScreen
-            }, completion: { success in banner.hidden = true })
+                banner.frame.origin = bannerOffScreen
+                self.pickerCollection.frame.size = newPickerSize
+                }, completion: { success in banner.hidden = true })
+        }
     }
     
     
