@@ -21,7 +21,9 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBOutlet weak var adBanner: ADBannerView!
     @IBOutlet weak var welcomeView: UIView!
     @IBOutlet weak var nextBarButton: UIBarButtonItem!
+    @IBOutlet weak var backBarButton: UIBarButtonItem!
     @IBOutlet weak var playerView: UIView!
+    @IBOutlet weak var styleArrow: UIImageView!
     
     var fetch : PHFetchResult?
     let imageManager = PHImageManager()
@@ -32,6 +34,11 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBOutlet weak var welcomeText: UILabel!
     @IBOutlet weak var playerContainerAspectConstraint: NSLayoutConstraint!
     @IBOutlet weak var playerContainerMarginConstraint: NSLayoutConstraint!
+    
+    //original positions for items that will animate
+    var originalPlayerPosition : CGPoint?
+    var originalStillViewerPosition : CGPoint?
+    var originalArrowPosition : CGPoint?
     
     
     override func viewWillAppear(animated: Bool) {
@@ -56,7 +63,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         else if authorization == PHAuthorizationStatus.Authorized {
             displayVideoThumbnails()
         }
-    
     }
     
     
@@ -67,13 +73,27 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         UIView.animateWithDuration(1.0, animations: {
             self.adBanner.frame.origin = offScreenOrigin
         })
+        
+        //save original positions for items that will animate
+        originalPlayerPosition = playerContainer.frame.origin
+        originalStillViewerPosition = stillFrameViewer.frame.origin
+        originalArrowPosition = styleArrow.frame.origin
     }
     
     
     override func viewDidDisappear(animated: Bool) {
-        playerController?.player.pause()
+        if let player = playerController?.player{
+            player.pause()
+        }
     }
 
+    
+    /**
+    *
+    *  Video Selection Picker
+    *
+    */
+    
     
     func displayVideoThumbnails(){
         let videoOptions = PHFetchOptions()
@@ -86,16 +106,17 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     //displays user selected video, unselects previous
     var currentSelected : NSIndexPath?
-    func selectAndDisplay(index: NSIndexPath) {
+    
+    func selectAndDisplay(selectionIndex: NSIndexPath) {
         if let previousIndex = currentSelected {
             let previousCell = pickerCollection.cellForItemAtIndexPath(previousIndex) as PickerCell?
             previousCell?.deselectCell()
         } else { //this is the first video selected
             nextBarButton.enabled = true
         }
-        let currentCell = pickerCollection.cellForItemAtIndexPath(index) as PickerCell?
+        let currentCell = pickerCollection.cellForItemAtIndexPath(selectionIndex) as PickerCell?
         currentCell?.selectCell()
-        currentSelected = index
+        currentSelected = selectionIndex
         
         //get current frame of current video
         if playerController?.player != nil {
@@ -111,20 +132,52 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             let lastPlayedFrame = generator.copyCGImageAtTime(playerController!.player.currentTime(), actualTime: nil, error: nil)
             stillFrameViewer.image = UIImage(CGImage: lastPlayedFrame, scale: 1.0, orientation: orientation)
             stillFrameViewer.alpha = 1
-            UIView.animateWithDuration(0.75, delay: 0.25, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations:
-                { self.stillFrameViewer.alpha = 0 }, completion: nil)
+            stillFrameViewer.frame.origin = originalStillViewerPosition!
         }
         
         //get asset for new video
-        let index = index.indexAtPosition(1)
+        let index = selectionIndex.indexAtPosition(1)
         if let asset = fetch?.objectAtIndex(index) as? PHAsset {
             imageManager.requestAVAssetForVideo(asset, options: nil, resultHandler: { video, audio, info in
-                self.playerController?.player = AVPlayer(playerItem: AVPlayerItem(asset: video))
                 self.playerController?.videoGravity = "AVLayerVideoGravityResizeAspectFill"
+                self.playerController?.player = AVPlayer(playerItem: AVPlayerItem(asset: video))
                 self.playerController?.player.play()
             })
-            playerContainer.hidden = false
-            welcomeView.hidden = true
+            //animate in player
+            playerContainer.frame.origin = CGPointMake(-playerContainer.frame.width, playerContainer.frame.origin.y)
+            UIView.animateWithDuration(1.0, delay: 0.25, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
+                    self.playerContainer.frame.origin = self.originalPlayerPosition!
+                }, completion: nil)
+            
+            if !welcomeView.hidden { //is first selection
+                playerContainer.hidden = false
+                let arrowStart = CGPointMake(-styleArrow.frame.width, styleArrow.frame.origin.y)
+                styleArrow.frame.origin = arrowStart
+                let welcomeViewEnd = CGPointMake(welcomeView.frame.origin.x + welcomeView.frame.width, welcomeView.frame.origin.y)
+                UIView.animateWithDuration(1.0, delay: 0.25, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
+                        self.welcomeView.frame.origin = welcomeViewEnd
+                    }, completion: { success in
+                        self.welcomeView.hidden = true
+                })
+                UIView.animateWithDuration(1.25, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
+                        self.styleArrow.frame.origin = self.originalArrowPosition!
+                    }, completion: nil)
+            }
+            else { //is not first selection
+                //animate out still frame viewer
+                let newStillFramePosition = CGPointMake(originalPlayerPosition!.x + playerContainer.frame.width, originalStillViewerPosition!.y)
+                UIView.animateWithDuration(1.0, delay: 0.25, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
+                        self.stillFrameViewer.frame.origin = newStillFramePosition
+                    }, completion: nil)
+                //bounce arrow
+                let newArrowPosition = CGPointMake(originalArrowPosition!.x - 35, originalArrowPosition!.y)
+                UIView.animateWithDuration(0.3, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 10, options: nil, animations: {
+                        self.styleArrow.frame.origin = newArrowPosition
+                    }, completion: nil)
+                UIView.animateWithDuration(1.0, delay: 0.3, usingSpringWithDamping: 0.4, initialSpringVelocity: 0, options: nil, animations: {
+                        self.styleArrow.frame.origin = self.originalArrowPosition!
+                    }, completion: nil)
+            }
         }
     }
 
@@ -208,7 +261,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         self.selectAndDisplay(indexPath)
     }
-    
+
     
     func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
         if let pickerCell = (pickerCollection.cellForItemAtIndexPath(indexPath) as? PickerCell) {
@@ -218,19 +271,53 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     
     /**
+    * Transition to and from Duration editor
+    */
+
+
+    @IBAction func nextButtonPressed(sender: AnyObject) {
+        let newPickerOrigin = CGPointMake(-self.view.frame.width * 2, pickerCollection.frame.origin.y)
+        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: nil, animations: {
+            self.pickerCollection.frame.origin = newPickerOrigin
+            }, completion: nil)
+        nextBarButton.enabled = false
+        backBarButton.tintColor = nextBarButton.tintColor
+        backBarButton.enabled = true
+    }
+    
+    
+    @IBAction func backButtonPressed(sender: AnyObject) {
+        let newPickerOrigin = CGPointMake(0, pickerCollection.frame.origin.y)
+        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: nil, animations: {
+            self.pickerCollection.frame.origin = newPickerOrigin
+            }, completion: nil)
+        backBarButton.enabled = false
+        backBarButton.tintColor = UIColor.clearColor()
+        nextBarButton.enabled = true
+    }
+    
+    /**
     * Ad Delegate - bring the banner on screen when it has an ad to display, move off when it doesn't
     */
     
+    var originalPickerHeight : CGFloat?
+    
     func bannerViewDidLoadAd(banner: ADBannerView!) {
         
+        //keep the video picker from being taller than it has space to be
+        if originalPickerHeight == nil {
+            originalPickerHeight = pickerCollection.frame.height
+        }
+        if pickerCollection.frame.height > originalPickerHeight {
+            pickerCollection.frame.size = CGSize(width: pickerCollection.frame.width, height: originalPickerHeight!)
+        }
+        
         if banner.hidden {
-            
             if banner.frame.origin.y < view.frame.height { //banner is currently on screen
                 banner.frame.origin = CGPointMake(0, view.frame.height)
             }
             
             banner.hidden = false
-            
             let height = banner.frame.height
             let newBannerPosition = CGPointMake(banner.frame.origin.x, banner.frame.origin.y - height)
             let newPickerSize = CGSizeMake(pickerCollection.frame.width, pickerCollection.frame.height - height)
@@ -246,7 +333,10 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     func bannerView(banner: ADBannerView!, didFailToReceiveAdWithError error: NSError!) {
         if !banner.hidden {
             let bannerOffScreen = CGPointMake(0, view.frame.height)
-            let newPickerSize = CGSizeMake(pickerCollection.frame.width, pickerCollection.frame.height + banner.frame.height)
+            var newPickerSize = CGSizeMake(pickerCollection.frame.width, pickerCollection.frame.height + banner.frame.height)
+            if newPickerSize.height > originalPickerHeight {
+                newPickerSize.height = originalPickerHeight!
+            }
             UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
                 banner.frame.origin = bannerOffScreen
                 self.pickerCollection.frame.size = newPickerSize
