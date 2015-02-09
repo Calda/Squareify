@@ -13,17 +13,20 @@ import AVFoundation
 import iAd
 
 class SquareifyController : UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, ADBannerViewDelegate {
-    
-    @IBOutlet weak var pickerCollection: UICollectionView!
-    @IBOutlet weak var pickerHolder: UIView!
+
     @IBOutlet weak var playerContainer: UIView!
     @IBOutlet weak var stillFrameViewer: UIImageView!
-    @IBOutlet weak var adBanner: ADBannerView!
     @IBOutlet weak var welcomeView: UIView!
     @IBOutlet weak var nextBarButton: UIBarButtonItem!
     @IBOutlet weak var backBarButton: UIBarButtonItem!
     @IBOutlet weak var playerView: UIView!
     @IBOutlet weak var styleArrow: UIImageView!
+    @IBOutlet weak var adBanner: ADBannerView!
+    
+    @IBOutlet weak var pickerCollection: UICollectionView!
+    
+    @IBOutlet weak var durationEditor: UIView!
+    @IBOutlet weak var timelineView: UIView!
     
     var fetch : PHFetchResult?
     let imageManager = PHImageManager()
@@ -35,10 +38,13 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBOutlet weak var playerContainerAspectConstraint: NSLayoutConstraint!
     @IBOutlet weak var playerContainerMarginConstraint: NSLayoutConstraint!
     
-    //original positions for items that will animate
+    //original configuations for items that will animate
     var originalPlayerPosition : CGPoint?
     var originalStillViewerPosition : CGPoint?
     var originalArrowPosition : CGPoint?
+    var originalDurationEditorPosition : CGPoint?
+    var originalPickerPosition : CGPoint?
+    var originalTimelineFrame : CGRect?
     
     
     override func viewWillAppear(animated: Bool) {
@@ -78,6 +84,10 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         originalPlayerPosition = playerContainer.frame.origin
         originalStillViewerPosition = stillFrameViewer.frame.origin
         originalArrowPosition = styleArrow.frame.origin
+        originalDurationEditorPosition = CGPointMake(self.view.frame.width, durationEditor.frame.origin.y)
+        durationEditor.frame.origin = originalDurationEditorPosition!
+        originalPickerPosition = pickerCollection.frame.origin
+        originalTimelineFrame = timelineView.frame
     }
     
     
@@ -106,7 +116,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     //displays user selected video, unselects previous
     var currentSelected : NSIndexPath?
-    
     func selectAndDisplay(selectionIndex: NSIndexPath) {
         if let previousIndex = currentSelected {
             let previousCell = pickerCollection.cellForItemAtIndexPath(previousIndex) as PickerCell?
@@ -121,16 +130,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         //get current frame of current video
         if playerController?.player != nil {
             playerController!.player.pause()
-            let currentVideoAsset = playerController!.player.currentItem.asset
-            let assetTrack = (currentVideoAsset.tracksWithMediaType(AVMediaTypeVideo).first as AVAssetTrack)
-            let transformedDims = CGSizeApplyAffineTransform(assetTrack.naturalSize, assetTrack.preferredTransform)
-            //from experimentation, a negative width value in the transformed dims means the image will need to be rotated
-            let orientation: UIImageOrientation = (transformedDims.width < 0 ? .Right : .Up)
-            let generator = AVAssetImageGenerator(asset: currentVideoAsset)
-            generator.requestedTimeToleranceAfter = kCMTimeZero
-            generator.requestedTimeToleranceBefore = kCMTimeZero
-            let lastPlayedFrame = generator.copyCGImageAtTime(playerController!.player.currentTime(), actualTime: nil, error: nil)
-            stillFrameViewer.image = UIImage(CGImage: lastPlayedFrame, scale: 1.0, orientation: orientation)
+            stillFrameViewer.image = self.getImageFromCurrentSelectionAtTime(playerController!.player.currentTime(), exact: true)
             stillFrameViewer.alpha = 1
             stillFrameViewer.frame.origin = originalStillViewerPosition!
         }
@@ -187,13 +187,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         if segue.identifier? == "embedViewer" {
             playerController = (segue.destinationViewController as AVPlayerViewController)
         }
-        //give data to duration editor
-        if segue.identifier == "pushDurationEditor" {
-            let durationController = (segue.destinationViewController as DurationController)
-            durationController.videoAsset = playerController?.player.currentItem.asset
-            let photoAsset = fetch!.objectAtIndex(currentSelected!.indexAtPosition(1)) as PHAsset
-            durationController.photoAsset = photoAsset
-        }
     }
     
     
@@ -237,31 +230,25 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         return cell
     }
     
-    
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
         return CGSize(width: 90, height: 90)
     }
-    
     
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAtIndex section: Int) -> UIEdgeInsets {
         return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
     }
     
-    
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAtIndex section: Int) -> CGFloat {
         return 1
     }
-    
     
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAtIndex section: Int) -> CGFloat {
         return 5
     }
     
-    
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         self.selectAndDisplay(indexPath)
     }
-
     
     func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
         if let pickerCell = (pickerCollection.cellForItemAtIndexPath(indexPath) as? PickerCell) {
@@ -270,16 +257,54 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     }
     
     
+    //utility function to retreive images from videos
+    func getImageFromCurrentSelectionAtTime(time: CMTime, exact: Bool) -> UIImage?{
+        if let currentSelection = currentAsset() {
+            let assetTrack = (currentSelection.tracksWithMediaType(AVMediaTypeVideo).first as AVAssetTrack)
+            let transformedDims = CGSizeApplyAffineTransform(assetTrack.naturalSize, assetTrack.preferredTransform)
+            //from experimentation, a negative width value in the transformed dims means the image will need to be rotated
+            let orientation: UIImageOrientation = (transformedDims.width < 0 ? .Right : .Up)
+            let generator = AVAssetImageGenerator(asset: currentSelection)
+            if exact {
+                generator.requestedTimeToleranceAfter = kCMTimeZero
+                generator.requestedTimeToleranceBefore = kCMTimeZero
+            }
+            let requestedFrame = generator.copyCGImageAtTime(time, actualTime: nil, error: nil)
+            let correctedFrame = UIImage(CGImage: requestedFrame, scale: 1.0, orientation: orientation)
+            return correctedFrame
+        }
+        return nil
+    }
+    
+    func currentAsset() -> AVAsset? {
+        return playerController?.player?.currentItem?.asset
+    }
+    
+    func currentAssetTrack() -> AVAssetTrack? {
+        if let currentAsset = currentAsset() {
+            return (currentAsset.tracksWithMediaType(AVMediaTypeVideo).first as AVAssetTrack)
+        }
+        return nil
+    }
+    
     /**
     * Transition to and from Duration editor
     */
 
-
     @IBAction func nextButtonPressed(sender: AnyObject) {
+        configureDurationEditor()
         let newPickerOrigin = CGPointMake(-self.view.frame.width * 2, pickerCollection.frame.origin.y)
         UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: nil, animations: {
-            self.pickerCollection.frame.origin = newPickerOrigin
+                self.pickerCollection.frame.origin = newPickerOrigin
+            }, completion: { success in
+                self.pickerCollection.hidden = true
+        })
+        durationEditor.frame.origin = originalDurationEditorPosition!
+        durationEditor.hidden = false
+        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: nil, animations: {
+                self.durationEditor.frame.origin = self.originalPickerPosition!
             }, completion: nil)
+        
         nextBarButton.enabled = false
         backBarButton.tintColor = nextBarButton.tintColor
         backBarButton.enabled = true
@@ -287,14 +312,69 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     
     @IBAction func backButtonPressed(sender: AnyObject) {
-        let newPickerOrigin = CGPointMake(0, pickerCollection.frame.origin.y)
+        pickerCollection.frame.origin = CGPointMake(-self.view.frame.width * 2, pickerCollection.frame.origin.y)
+        pickerCollection.hidden = false
         UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: nil, animations: {
-            self.pickerCollection.frame.origin = newPickerOrigin
+            self.pickerCollection.frame.origin = self.originalPickerPosition!
             }, completion: nil)
+        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: nil, animations: {
+                self.durationEditor.frame.origin = self.originalDurationEditorPosition!
+            }, completion: { success in
+                self.durationEditor.hidden = true
+        })
         backBarButton.enabled = false
         backBarButton.tintColor = UIColor.clearColor()
         nextBarButton.enabled = true
     }
+    
+    
+    /**
+    * Prepare Duration Editor
+    */
+    
+    func configureDurationEditor() {
+        //erase any previous stills
+        for subview in timelineView.subviews {
+            if let imageView = subview as? UIImageView {
+                imageView.removeFromSuperview()
+            }
+        }
+        
+        //generate new stills
+        let width = timelineView.frame.width
+        let height = timelineView.frame.height
+        let assetTrack = currentAssetTrack()!
+        let firstFrameImage = self.getImageFromCurrentSelectionAtTime(kCMTimeZero, exact: false)!
+        
+        let frameSize = firstFrameImage.size
+        let frameAspect = frameSize.width / frameSize.height
+        let frameWidthOnTimeline = frameAspect * height
+        let numberOfFramesOnTimeline: Int = Int(ceil(width / frameWidthOnTimeline))
+        let durationPerFrame = CMTimeGetSeconds(assetTrack.timeRange.duration) / Float64(numberOfFramesOnTimeline)
+        
+        var totalNewWidth : CGFloat?
+        
+        for frame in 0...(numberOfFramesOnTimeline - 1) {
+            let size = CGSizeMake(frameWidthOnTimeline, height)
+            let origin = CGPointMake((frameWidthOnTimeline + 1) * CGFloat(frame), 0) //+  adds gutter
+            let imageView = UIImageView(frame: CGRect(origin: origin, size: size))
+            imageView.contentMode = UIViewContentMode.ScaleAspectFit
+            let frameTime = CMTimeMakeWithSeconds(durationPerFrame * Float64(frame), 1000)
+            imageView.image = self.getImageFromCurrentSelectionAtTime(frameTime, exact: true)
+            timelineView.addSubview(imageView)
+            if frame == numberOfFramesOnTimeline - 1 { //is last still
+                totalNewWidth = CGFloat(origin.x + size.width)
+            }
+        }
+        
+        //crop timeline view
+        let shape = CAShapeLayer()
+        let mask = CGRect(origin: CGPointMake(0, 0), size: originalTimelineFrame!.size)
+        shape.path = UIBezierPath(roundedRect: mask, byRoundingCorners: UIRectCorner.AllCorners, cornerRadii: CGSizeMake(10, 10)).CGPath
+        timelineView.layer.mask = shape
+    }
+    
+    
     
     /**
     * Ad Delegate - bring the banner on screen when it has an ad to display, move off when it doesn't

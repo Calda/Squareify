@@ -191,6 +191,25 @@
                                     <outlet property="delegate" destination="blJ-Ad-SC4" id="q2M-LJ-kjV"/>
                                 </connections>
                             </collectionView>
+                            <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jMm-3V-9o0" userLabel="Duration Editor">
+                                <rect key="frame" x="0.0" y="320" width="320" height="248"/>
+                                <subviews>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="oB6-Bo-X13" userLabel="Timeline">
+                                        <rect key="frame" x="15" y="10" width="290" height="75"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="75" id="Til-DQ-e4J"/>
+                                        </constraints>
+                                    </view>
+                                </subviews>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="centerX" secondItem="oB6-Bo-X13" secondAttribute="centerX" id="362-yS-v5C"/>
+                                    <constraint firstItem="oB6-Bo-X13" firstAttribute="top" secondItem="jMm-3V-9o0" secondAttribute="top" constant="10" id="6TV-hR-7Jf"/>
+                                    <constraint firstItem="oB6-Bo-X13" firstAttribute="leading" secondItem="jMm-3V-9o0" secondAttribute="leading" constant="15" id="O6D-SZ-j7l"/>
+                                    <constraint firstAttribute="trailing" secondItem="oB6-Bo-X13" secondAttribute="trailing" constant="15" id="xfv-Ll-ghm"/>
+                                </constraints>
+                            </view>
                             <adBannerView hidden="YES" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" translatesAutoresizingMaskIntoConstraints="NO" id="K4F-yr-JC9" userLabel="iAd Banner">
                                 <rect key="frame" x="0.0" y="518" width="320" height="50"/>
                                 <connections>
@@ -201,7 +220,9 @@
                         <color key="backgroundColor" red="1" green="0.99997437000274658" blue="0.99999129772186279" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
                             <constraint firstItem="6fM-0Q-KWN" firstAttribute="top" secondItem="otd-uu-v4I" secondAttribute="bottom" id="02I-LL-Hzi"/>
+                            <constraint firstItem="q4t-xT-zIb" firstAttribute="width" secondItem="oB6-Bo-X13" secondAttribute="width" id="3fl-vV-qXz"/>
                             <constraint firstItem="6fM-0Q-KWN" firstAttribute="leading" secondItem="J3h-qN-MqL" secondAttribute="leading" id="4w8-ky-Onp"/>
+                            <constraint firstItem="K4F-yr-JC9" firstAttribute="top" secondItem="jMm-3V-9o0" secondAttribute="bottom" id="8vA-zL-swm"/>
                             <constraint firstItem="K4F-yr-JC9" firstAttribute="top" secondItem="Inz-DY-7At" secondAttribute="bottom" id="982-V1-OWq"/>
                             <constraint firstAttribute="trailing" secondItem="K4F-yr-JC9" secondAttribute="trailing" id="9S9-iq-lTe"/>
                             <constraint firstItem="K4F-yr-JC9" firstAttribute="top" secondItem="Inz-DY-7At" secondAttribute="bottom" id="Amz-4w-SKu"/>
@@ -209,13 +230,17 @@
                             <constraint firstItem="HHG-qL-iqb" firstAttribute="leading" secondItem="J3h-qN-MqL" secondAttribute="leading" id="D61-2b-pum"/>
                             <constraint firstItem="Inz-DY-7At" firstAttribute="top" secondItem="K4F-yr-JC9" secondAttribute="bottom" id="Ejt-WZ-jZU"/>
                             <constraint firstItem="NK1-QR-9ba" firstAttribute="top" secondItem="6fM-0Q-KWN" secondAttribute="bottom" id="IZh-Ho-wvz"/>
+                            <constraint firstItem="Inz-DY-7At" firstAttribute="top" secondItem="jMm-3V-9o0" secondAttribute="bottom" id="LWT-GG-nfz"/>
                             <constraint firstItem="HHG-qL-iqb" firstAttribute="top" secondItem="6fM-0Q-KWN" secondAttribute="bottom" id="NdM-lZ-MZA"/>
                             <constraint firstAttribute="trailing" secondItem="NK1-QR-9ba" secondAttribute="trailing" id="Tsh-Ta-G0p"/>
                             <constraint firstItem="NK1-QR-9ba" firstAttribute="leading" secondItem="J3h-qN-MqL" secondAttribute="leading" id="UzK-Q4-wa2"/>
+                            <constraint firstAttribute="trailing" secondItem="jMm-3V-9o0" secondAttribute="trailing" id="YCH-bp-0Iz"/>
                             <constraint firstItem="Inz-DY-7At" firstAttribute="top" secondItem="K4F-yr-JC9" secondAttribute="bottom" id="cYg-V9-cFr"/>
+                            <constraint firstItem="jMm-3V-9o0" firstAttribute="leading" secondItem="J3h-qN-MqL" secondAttribute="leading" id="env-pu-7fQ"/>
                             <constraint firstItem="K4F-yr-JC9" firstAttribute="leading" secondItem="J3h-qN-MqL" secondAttribute="leading" id="hZ1-Hc-tiH"/>
                             <constraint firstAttribute="bottom" secondItem="K4F-yr-JC9" secondAttribute="bottom" id="hhT-ca-L8V"/>
                             <constraint firstItem="6fM-0Q-KWN" firstAttribute="top" secondItem="J3h-qN-MqL" secondAttribute="top" id="iSq-O7-nD9"/>
+                            <constraint firstItem="jMm-3V-9o0" firstAttribute="top" secondItem="6fM-0Q-KWN" secondAttribute="bottom" id="lqa-ty-Ab3"/>
                             <constraint firstAttribute="trailing" secondItem="6fM-0Q-KWN" secondAttribute="trailing" id="lvQ-fD-U9F"/>
                             <constraint firstAttribute="trailing" secondItem="HHG-qL-iqb" secondAttribute="trailing" id="meg-46-3SY"/>
                             <constraint firstItem="Inz-DY-7At" firstAttribute="top" secondItem="HHG-qL-iqb" secondAttribute="bottom" id="qxs-fB-PlR"/>
@@ -225,8 +250,10 @@
                         <variation key="default">
                             <mask key="constraints">
                                 <exclude reference="iSq-O7-nD9"/>
+                                <exclude reference="3fl-vV-qXz"/>
                                 <exclude reference="BwP-GO-C3j"/>
                                 <exclude reference="NdM-lZ-MZA"/>
+                                <exclude reference="8vA-zL-swm"/>
                                 <exclude reference="982-V1-OWq"/>
                                 <exclude reference="Amz-4w-SKu"/>
                                 <exclude reference="hhT-ca-L8V"/>
@@ -253,6 +280,7 @@
                     <connections>
                         <outlet property="adBanner" destination="K4F-yr-JC9" id="bQb-L2-lVz"/>
                         <outlet property="backBarButton" destination="7FN-Bg-jZp" id="IGi-in-RtK"/>
+                        <outlet property="durationEditor" destination="jMm-3V-9o0" id="Htd-cm-m6q"/>
                         <outlet property="nextBarButton" destination="a3h-kk-GOO" id="lAU-X1-G3q"/>
                         <outlet property="pickerCollection" destination="HHG-qL-iqb" id="MRi-j1-MFr"/>
                         <outlet property="playerContainer" destination="q4t-xT-zIb" id="4FF-MR-3Rx"/>
@@ -262,13 +290,14 @@
                         <outlet property="playerViewAspectConstraint" destination="wCf-by-9qj" id="9RV-1w-3Nh"/>
                         <outlet property="stillFrameViewer" destination="Xhc-Um-8eo" id="QbH-ja-RMc"/>
                         <outlet property="styleArrow" destination="JTn-eK-26o" id="yYS-4E-F5D"/>
+                        <outlet property="timelineView" destination="oB6-Bo-X13" id="6gd-Ic-e2H"/>
                         <outlet property="welcomeText" destination="TS0-zo-FMK" id="ZqS-OH-CtY"/>
                         <outlet property="welcomeView" destination="VmU-r7-McV" id="ic2-EW-1vY"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="RVW-Ny-1Bm" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-37" y="-664"/>
+            <point key="canvasLocation" x="-30" y="-675"/>
         </scene>
         <!--AV Player View Controller-->
         <scene sceneID="knu-SP-95z">
@@ -276,7 +305,7 @@
                 <avPlayerViewController videoGravity="AVLayerVideoGravityResizeAspect" id="u0K-Pu-dOF" sceneMemberID="viewController"/>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="U9P-k9-JSt" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-99.5" y="-118"/>
+            <point key="canvasLocation" x="-29.5" y="-111"/>
         </scene>
         <!--Viewer-->
         <scene sceneID="ufC-wZ-h7g">

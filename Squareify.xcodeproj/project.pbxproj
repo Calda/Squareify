@@ -15,7 +15,6 @@
 		2E3299891A6318AC00991FD3 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2E3299871A6318AC00991FD3 /* LaunchScreen.xib */; };
 		2E3299951A6318AC00991FD3 /* SquareifyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E3299941A6318AC00991FD3 /* SquareifyTests.swift */; };
 		2E3C06EB1A6C4C2A0053E07C /* iAd.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E3C06EA1A6C4C2A0053E07C /* iAd.framework */; };
-		2E3E651F1A7F07AC004D9F55 /* DurationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E3E651E1A7F07AC004D9F55 /* DurationController.swift */; };
 		2E3E65211A7F07CE004D9F55 /* SquareifyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E3E65201A7F07CE004D9F55 /* SquareifyController.swift */; };
 		2E8546981A64B2BA00F5FAEB /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E8546971A64B2BA00F5FAEB /* CoreMedia.framework */; };
 		2E85469A1A64B2CA00F5FAEB /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E8546991A64B2CA00F5FAEB /* AVFoundation.framework */; };
@@ -50,7 +49,6 @@
 		2E3299931A6318AC00991FD3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2E3299941A6318AC00991FD3 /* SquareifyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquareifyTests.swift; sourceTree = "<group>"; };
 		2E3C06EA1A6C4C2A0053E07C /* iAd.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iAd.framework; path = System/Library/Frameworks/iAd.framework; sourceTree = SDKROOT; };
-		2E3E651E1A7F07AC004D9F55 /* DurationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DurationController.swift; sourceTree = "<group>"; };
 		2E3E65201A7F07CE004D9F55 /* SquareifyController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SquareifyController.swift; sourceTree = "<group>"; };
 		2E8546971A64B2BA00F5FAEB /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		2E8546991A64B2CA00F5FAEB /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -115,7 +113,6 @@
 			children = (
 				2E3299821A6318AC00991FD3 /* Main.storyboard */,
 				2E3E65201A7F07CE004D9F55 /* SquareifyController.swift */,
-				2E3E651E1A7F07AC004D9F55 /* DurationController.swift */,
 				2E3299801A6318AC00991FD3 /* EditorController.swift */,
 				2E32997E1A6318AC00991FD3 /* AppDelegate.swift */,
 				2EDC8A731A7B0CC40085EE38 /* PickerCell.swift */,
@@ -259,7 +256,6 @@
 			files = (
 				2EDC8A741A7B0CC40085EE38 /* PickerCell.swift in Sources */,
 				2E3299811A6318AC00991FD3 /* EditorController.swift in Sources */,
-				2E3E651F1A7F07AC004D9F55 /* DurationController.swift in Sources */,
 				2E32997F1A6318AC00991FD3 /* AppDelegate.swift in Sources */,
 				2E3E65211A7F07CE004D9F55 /* SquareifyController.swift in Sources */,
 			);
