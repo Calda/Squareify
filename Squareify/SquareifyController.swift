@@ -13,7 +13,9 @@ import AVFoundation
 import iAd
 
 class SquareifyController : UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, ADBannerViewDelegate {
-
+    
+    let backgroundQueue = dispatch_queue_create("Background serial queue", DISPATCH_QUEUE_SERIAL)
+    
     @IBOutlet weak var playerContainer: UIView!
     @IBOutlet weak var stillFrameViewer: UIImageView!
     @IBOutlet weak var welcomeView: UIView!
@@ -294,14 +296,14 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBAction func nextButtonPressed(sender: AnyObject) {
         configureDurationEditor()
         let newPickerOrigin = CGPointMake(-self.view.frame.width * 2, pickerCollection.frame.origin.y)
-        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: nil, animations: {
+        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
                 self.pickerCollection.frame.origin = newPickerOrigin
             }, completion: { success in
                 self.pickerCollection.hidden = true
         })
         durationEditor.frame.origin = originalDurationEditorPosition!
         durationEditor.hidden = false
-        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: nil, animations: {
+        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
                 self.durationEditor.frame.origin = self.originalPickerPosition!
             }, completion: nil)
         
@@ -314,10 +316,10 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBAction func backButtonPressed(sender: AnyObject) {
         pickerCollection.frame.origin = CGPointMake(-self.view.frame.width * 2, pickerCollection.frame.origin.y)
         pickerCollection.hidden = false
-        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: nil, animations: {
+        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
             self.pickerCollection.frame.origin = self.originalPickerPosition!
             }, completion: nil)
-        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: nil, animations: {
+        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
                 self.durationEditor.frame.origin = self.originalDurationEditorPosition!
             }, completion: { success in
                 self.durationEditor.hidden = true
@@ -349,10 +351,8 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         let frameSize = firstFrameImage.size
         let frameAspect = frameSize.width / frameSize.height
         let frameWidthOnTimeline = frameAspect * height
-        let numberOfFramesOnTimeline: Int = Int(ceil(width / frameWidthOnTimeline))
+        let numberOfFramesOnTimeline: Int = Int(ceil(width / (frameWidthOnTimeline + 1))) //+1 for gutter
         let durationPerFrame = CMTimeGetSeconds(assetTrack.timeRange.duration) / Float64(numberOfFramesOnTimeline)
-        
-        var totalNewWidth : CGFloat?
         
         for frame in 0...(numberOfFramesOnTimeline - 1) {
             let size = CGSizeMake(frameWidthOnTimeline, height)
@@ -360,11 +360,26 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             let imageView = UIImageView(frame: CGRect(origin: origin, size: size))
             imageView.contentMode = UIViewContentMode.ScaleAspectFit
             let frameTime = CMTimeMakeWithSeconds(durationPerFrame * Float64(frame), 1000)
-            imageView.image = self.getImageFromCurrentSelectionAtTime(frameTime, exact: true)
-            timelineView.addSubview(imageView)
-            if frame == numberOfFramesOnTimeline - 1 { //is last still
-                totalNewWidth = CGFloat(origin.x + size.width)
-            }
+            dispatch_async(backgroundQueue, {
+                let image = self.getImageFromCurrentSelectionAtTime(frameTime, exact: true)
+                UIGraphicsBeginImageContext(CGSizeMake(1,1))
+                let context = UIGraphicsGetCurrentContext()
+                CGContextDrawImage(context, CGRectMake(0,0,1,1), image!.CGImage)
+                UIGraphicsEndImageContext()
+                //animate in new stills
+                dispatch_sync(dispatch_get_main_queue(), {
+                    imageView.image = image
+                    let animateFinal = imageView.frame.origin
+                    let animateStart = CGPointMake(animateFinal.x - 100, animateFinal.y)
+                    imageView.frame.origin = animateStart
+                    imageView.alpha = 0
+                    UIView.animateWithDuration(0.75, delay: 0, usingSpringWithDamping: 0.65, initialSpringVelocity: 0, options: nil, animations: {
+                            imageView.frame.origin = animateFinal
+                            imageView.alpha = 1
+                        }, completion: nil)
+                })
+            })
+            self.timelineView.addSubview(imageView)
         }
         
         //crop timeline view
