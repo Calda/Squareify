@@ -203,12 +203,16 @@
                                     </view>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <gestureRecognizers/>
                                 <constraints>
                                     <constraint firstAttribute="centerX" secondItem="oB6-Bo-X13" secondAttribute="centerX" id="362-yS-v5C"/>
                                     <constraint firstItem="oB6-Bo-X13" firstAttribute="top" secondItem="jMm-3V-9o0" secondAttribute="top" constant="10" id="6TV-hR-7Jf"/>
                                     <constraint firstItem="oB6-Bo-X13" firstAttribute="leading" secondItem="jMm-3V-9o0" secondAttribute="leading" constant="15" id="O6D-SZ-j7l"/>
                                     <constraint firstAttribute="trailing" secondItem="oB6-Bo-X13" secondAttribute="trailing" constant="15" id="xfv-Ll-ghm"/>
                                 </constraints>
+                                <connections>
+                                    <outletCollection property="gestureRecognizers" destination="KhW-F7-DWJ" appends="YES" id="ASh-SS-MsD"/>
+                                </connections>
                             </view>
                             <adBannerView hidden="YES" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" translatesAutoresizingMaskIntoConstraints="NO" id="K4F-yr-JC9" userLabel="iAd Banner">
                                 <rect key="frame" x="0.0" y="518" width="320" height="50"/>
@@ -218,6 +222,7 @@
                             </adBannerView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="0.99997437000274658" blue="0.99999129772186279" alpha="1" colorSpace="calibratedRGB"/>
+                        <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="6fM-0Q-KWN" firstAttribute="top" secondItem="otd-uu-v4I" secondAttribute="bottom" id="02I-LL-Hzi"/>
                             <constraint firstItem="q4t-xT-zIb" firstAttribute="width" secondItem="oB6-Bo-X13" secondAttribute="width" id="3fl-vV-qXz"/>
@@ -281,6 +286,7 @@
                         <outlet property="adBanner" destination="K4F-yr-JC9" id="bQb-L2-lVz"/>
                         <outlet property="backBarButton" destination="7FN-Bg-jZp" id="IGi-in-RtK"/>
                         <outlet property="durationEditor" destination="jMm-3V-9o0" id="Htd-cm-m6q"/>
+                        <outlet property="navigationItem" destination="8QT-2d-43y" id="5qM-oe-OeL"/>
                         <outlet property="nextBarButton" destination="a3h-kk-GOO" id="lAU-X1-G3q"/>
                         <outlet property="pickerCollection" destination="HHG-qL-iqb" id="MRi-j1-MFr"/>
                         <outlet property="playerContainer" destination="q4t-xT-zIb" id="4FF-MR-3Rx"/>
@@ -296,6 +302,11 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="RVW-Ny-1Bm" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <panGestureRecognizer minimumNumberOfTouches="1" id="KhW-F7-DWJ">
+                    <connections>
+                        <action selector="durationEditorPanRecognized:" destination="blJ-Ad-SC4" id="XJM-dm-Toj"/>
+                    </connections>
+                </panGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="-30" y="-675"/>
         </scene>

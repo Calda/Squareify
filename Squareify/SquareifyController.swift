@@ -12,9 +12,12 @@ import AVKit
 import AVFoundation
 import iAd
 
-class SquareifyController : UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, ADBannerViewDelegate {
+class SquareifyController : UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, ADBannerViewDelegate, UIGestureRecognizerDelegate {
     
-    let backgroundQueue = dispatch_queue_create("Background serial queue", DISPATCH_QUEUE_SERIAL)
+    let BACKGROUND_QUEUE = dispatch_queue_create("Background serial queue", DISPATCH_QUEUE_SERIAL)
+    let COLOR_DARK = UIColor(red: 43/256, green: 132/256, blue: 131/256, alpha: 1.0)
+    let COLOR_MEDIUM = UIColor(red: 56/256, green: 174/256, blue: 172/256, alpha: 1.0)
+    let COLOR_LIGHT = UIColor(red: 95/256, green: 205/256, blue: 204/256, alpha: 1.0)
     
     @IBOutlet weak var playerContainer: UIView!
     @IBOutlet weak var stillFrameViewer: UIImageView!
@@ -29,6 +32,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     @IBOutlet weak var durationEditor: UIView!
     @IBOutlet weak var timelineView: UIView!
+    var timelineHandles: (left: UIView, right: UIView)?
     
     var fetch : PHFetchResult?
     let imageManager = PHImageManager()
@@ -47,6 +51,13 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     var originalDurationEditorPosition : CGPoint?
     var originalPickerPosition : CGPoint?
     var originalTimelineFrame : CGRect?
+    
+    //the current view of the app
+    enum SquareifyMode {
+        case Picker, Duration
+    }
+    
+    var currentMode : SquareifyMode = .Picker
     
     
     override func viewWillAppear(animated: Bool) {
@@ -90,6 +101,19 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         durationEditor.frame.origin = originalDurationEditorPosition!
         originalPickerPosition = pickerCollection.frame.origin
         originalTimelineFrame = timelineView.frame
+        
+        //add gesture recognizer
+        let edgePanRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: "edgePanTrigger:")
+        edgePanRecognizer.edges = .Left
+        self.view.addGestureRecognizer(edgePanRecognizer)
+        
+        //change title view
+        let titleView = UILabel(frame: CGRectMake(0, 0, 100, 200))
+        titleView.textAlignment = NSTextAlignment.Center
+        titleView.text = "Squareify"
+        titleView.textColor = UIColor.whiteColor()
+        titleView.font = UIFont(name: "STHeitiSC-Medium", size: 21)
+        navigationItem.titleView = titleView
     }
     
     
@@ -258,48 +282,24 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         }
     }
     
-    
-    //utility function to retreive images from videos
-    func getImageFromCurrentSelectionAtTime(time: CMTime, exact: Bool) -> UIImage?{
-        if let currentSelection = currentAsset() {
-            let assetTrack = (currentSelection.tracksWithMediaType(AVMediaTypeVideo).first as AVAssetTrack)
-            let transformedDims = CGSizeApplyAffineTransform(assetTrack.naturalSize, assetTrack.preferredTransform)
-            //from experimentation, a negative width value in the transformed dims means the image will need to be rotated
-            let orientation: UIImageOrientation = (transformedDims.width < 0 ? .Right : .Up)
-            let generator = AVAssetImageGenerator(asset: currentSelection)
-            if exact {
-                generator.requestedTimeToleranceAfter = kCMTimeZero
-                generator.requestedTimeToleranceBefore = kCMTimeZero
-            }
-            let requestedFrame = generator.copyCGImageAtTime(time, actualTime: nil, error: nil)
-            let correctedFrame = UIImage(CGImage: requestedFrame, scale: 1.0, orientation: orientation)
-            return correctedFrame
-        }
-        return nil
-    }
-    
-    func currentAsset() -> AVAsset? {
-        return playerController?.player?.currentItem?.asset
-    }
-    
-    func currentAssetTrack() -> AVAssetTrack? {
-        if let currentAsset = currentAsset() {
-            return (currentAsset.tracksWithMediaType(AVMediaTypeVideo).first as AVAssetTrack)
-        }
-        return nil
-    }
-    
     /**
     * Transition to and from Duration editor
     */
-
+    
     @IBAction func nextButtonPressed(sender: AnyObject) {
-        configureDurationEditor()
+        if currentMode == .Duration {
+            return //cannot go forward from Duration Editor yet
+        }
+        currentMode = .Duration
+        changeViewTitleTo("Trim Clip", duration: 0.5)
+        prepareDurationEditor()
         let newPickerOrigin = CGPointMake(-self.view.frame.width * 2, pickerCollection.frame.origin.y)
         UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
                 self.pickerCollection.frame.origin = newPickerOrigin
             }, completion: { success in
-                self.pickerCollection.hidden = true
+                if self.currentMode != .Picker {
+                    self.pickerCollection.hidden = true
+                }
         })
         durationEditor.frame.origin = originalDurationEditorPosition!
         durationEditor.hidden = false
@@ -308,12 +308,19 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             }, completion: nil)
         
         nextBarButton.enabled = false
-        backBarButton.tintColor = nextBarButton.tintColor
+        UIView.animateWithDuration(0.5, animations: {
+            self.backBarButton.tintColor = self.nextBarButton.tintColor
+        })
         backBarButton.enabled = true
     }
     
     
-    @IBAction func backButtonPressed(sender: AnyObject) {
+    @IBAction func backButtonPressed(sender: AnyObject?) {
+        if currentMode == .Picker {
+            return //cannot go back from picker
+        }
+        changeViewTitleTo("Squareify", duration: 0.5)
+        currentMode = .Picker
         pickerCollection.frame.origin = CGPointMake(-self.view.frame.width * 2, pickerCollection.frame.origin.y)
         pickerCollection.hidden = false
         UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
@@ -322,11 +329,29 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
                 self.durationEditor.frame.origin = self.originalDurationEditorPosition!
             }, completion: { success in
-                self.durationEditor.hidden = true
+                if self.currentMode != .Duration {
+                    self.durationEditor.hidden = true
+                }
         })
         backBarButton.enabled = false
-        backBarButton.tintColor = UIColor.clearColor()
+        UIView.animateWithDuration(0.5, animations: {
+            self.backBarButton.tintColor = UIColor.clearColor()
+        })
         nextBarButton.enabled = true
+    }
+    
+    
+    func edgePanTrigger(sender: UIScreenEdgePanGestureRecognizer) {
+        if currentMode == .Duration {
+            //keep edge pan from working when on top of timeline
+            let panLocation = sender.locationInView(durationEditor)
+            let zoneTop = timelineView.frame.origin.y - 20
+            let zoneBottom = timelineView.frame.origin.y + timelineView.frame.height + 20
+            let allowEdgePan = !(panLocation.y > zoneTop && panLocation.y < zoneBottom)
+            if allowEdgePan {
+                backButtonPressed(sender)
+            }
+        }
     }
     
     
@@ -334,7 +359,13 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     * Prepare Duration Editor
     */
     
-    func configureDurationEditor() {
+    func prepareDurationEditor() {
+        resetTimelineControls()
+        populateTimelineView()
+    }
+    
+    
+    func populateTimelineView() {
         //erase any previous stills
         for subview in timelineView.subviews {
             if let imageView = subview as? UIImageView {
@@ -347,26 +378,33 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         let height = timelineView.frame.height
         let assetTrack = currentAssetTrack()!
         let firstFrameImage = self.getImageFromCurrentSelectionAtTime(kCMTimeZero, exact: false)!
-        
+
         let frameSize = firstFrameImage.size
         let frameAspect = frameSize.width / frameSize.height
         let frameWidthOnTimeline = frameAspect * height
         let numberOfFramesOnTimeline: Int = Int(ceil(width / (frameWidthOnTimeline + 1))) //+1 for gutter
         let durationPerFrame = CMTimeGetSeconds(assetTrack.timeRange.duration) / Float64(numberOfFramesOnTimeline)
-        
-        for frame in 0...(numberOfFramesOnTimeline - 1) {
-            let size = CGSizeMake(frameWidthOnTimeline, height)
-            let origin = CGPointMake((frameWidthOnTimeline + 1) * CGFloat(frame), 0) //+  adds gutter
+        generateAndAddFrames(numberOfFramesOnTimeline, width: frameWidthOnTimeline, height: height, durationPerFrame: durationPerFrame)
+    
+        applyRoundedMask(view: timelineView, cornerRadii: 10, corners: .AllCorners)
+    }
+    
+    
+    func generateAndAddFrames(count: Int, width: CGFloat, height: CGFloat, durationPerFrame: Float64) {
+        for frame in 0...(count - 1) {
+            let size = CGSizeMake(width, height)
+            let origin = CGPointMake((width + 1) * CGFloat(frame), 0) //+  adds gutter
             let imageView = UIImageView(frame: CGRect(origin: origin, size: size))
             imageView.contentMode = UIViewContentMode.ScaleAspectFit
             let frameTime = CMTimeMakeWithSeconds(durationPerFrame * Float64(frame), 1000)
-            dispatch_async(backgroundQueue, {
+            dispatch_async(BACKGROUND_QUEUE, {
+                //grab frame
                 let image = self.getImageFromCurrentSelectionAtTime(frameTime, exact: true)
                 UIGraphicsBeginImageContext(CGSizeMake(1,1))
                 let context = UIGraphicsGetCurrentContext()
                 CGContextDrawImage(context, CGRectMake(0,0,1,1), image!.CGImage)
                 UIGraphicsEndImageContext()
-                //animate in new stills
+                //animate in new frame
                 dispatch_sync(dispatch_get_main_queue(), {
                     imageView.image = image
                     let animateFinal = imageView.frame.origin
@@ -374,21 +412,86 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
                     imageView.frame.origin = animateStart
                     imageView.alpha = 0
                     UIView.animateWithDuration(0.75, delay: 0, usingSpringWithDamping: 0.65, initialSpringVelocity: 0, options: nil, animations: {
-                            imageView.frame.origin = animateFinal
-                            imageView.alpha = 1
+                        imageView.frame.origin = animateFinal
+                        imageView.alpha = 1
                         }, completion: nil)
+                    //animate in handles when left image in on screen
+                    if frame == count - 1 {
+                        self.animateInHandles()
+                    }
                 })
             })
             self.timelineView.addSubview(imageView)
         }
-        
-        //crop timeline view
-        let shape = CAShapeLayer()
-        let mask = CGRect(origin: CGPointMake(0, 0), size: originalTimelineFrame!.size)
-        shape.path = UIBezierPath(roundedRect: mask, byRoundingCorners: UIRectCorner.AllCorners, cornerRadii: CGSizeMake(10, 10)).CGPath
-        timelineView.layer.mask = shape
     }
     
+    
+    func animateInHandles() {
+        if let (right, left) = self.timelineHandles? {
+            for handle in [right, left] {
+                let originalPos = handle.frame.origin
+                let startPos = CGPointMake(originalPos.x, originalPos.y + handle.frame.height)
+                handle.frame.origin = startPos
+                UIView.animateWithDuration(1, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0, options: nil, animations: {
+                    handle.frame.origin = originalPos
+                    handle.alpha = 1
+                    }, completion: nil)
+            }
+        }
+    }
+    
+    
+    func resetTimelineControls() {
+        //create handles
+        if timelineHandles == nil { //is first time showing clip trimmer
+            let handleHeight = timelineView.frame.height + 10
+            let handleWidth = CGFloat(10)
+            let handleY = timelineView.frame.origin.y - 5
+            let leftHandle = UIView(frame: CGRectMake(timelineView.frame.origin.x, handleY, handleWidth, handleHeight))
+            let rightHandle = UIView(frame: CGRectMake(timelineView.frame.origin.x + timelineView.frame.width - handleWidth , handleY, handleWidth, handleHeight))
+            timelineHandles = (left: leftHandle, right: rightHandle)
+            for handle in [leftHandle, rightHandle] {
+                handle.backgroundColor = COLOR_MEDIUM
+                applyRoundedMask(view: handle, cornerRadii: 10, corners: .AllCorners)
+                durationEditor.addSubview(handle)
+            }
+        }
+        //reset handles
+        let (leftHandle, rightHandle) = timelineHandles!
+        for handle in [leftHandle, rightHandle] {
+            handle.alpha = 0
+        }
+    }
+    
+    
+    /**
+    * Duration Editor use functions
+    */
+    
+    var grabbedHandle : UIView?
+    
+    @IBAction func durationEditorPanRecognized(pan: UIPanGestureRecognizer) {
+        let panLoc = pan.locationInView(durationEditor)
+        
+        if pan.state == .Began {
+            if let (leftHandle, rightHandle) = self.timelineHandles? {
+                if self.isTouch(pan.locationInView(leftHandle), inView: leftHandle, withPadding: 25) {
+                    grabbedHandle = leftHandle
+                }
+                else if self.isTouch(pan.locationInView(rightHandle), inView: rightHandle, withPadding: 25) {
+                    grabbedHandle = rightHandle
+                }
+            }
+        }
+        
+        if let handle = grabbedHandle {
+            handle.frame.origin = CGPointMake(panLoc.x, handle.frame.origin.y)
+        }
+        
+        if pan.state == .Ended {
+            grabbedHandle = nil
+        }
+    }
     
     
     /**
@@ -446,6 +549,72 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             playerController?.player.seekToTime(kCMTimeZero)
             playerController?.player.play()
         }
+    }
+    
+    
+    /**
+    * Utility Functions
+    */
+    
+    //retreive images from videos
+    func getImageFromCurrentSelectionAtTime(time: CMTime, exact: Bool) -> UIImage?{
+        if let currentSelection = currentAsset() {
+            let assetTrack = (currentSelection.tracksWithMediaType(AVMediaTypeVideo).first as AVAssetTrack)
+            let transformedDims = CGSizeApplyAffineTransform(assetTrack.naturalSize, assetTrack.preferredTransform)
+            //from experimentation, a negative width value in the transformed dims means the image will need to be rotated
+            let orientation: UIImageOrientation = (transformedDims.width < 0 ? .Right : .Up)
+            let generator = AVAssetImageGenerator(asset: currentSelection)
+            if exact {
+                generator.requestedTimeToleranceAfter = kCMTimeZero
+                generator.requestedTimeToleranceBefore = kCMTimeZero
+            }
+            let requestedFrame = generator.copyCGImageAtTime(time, actualTime: nil, error: nil)
+            let correctedFrame = UIImage(CGImage: requestedFrame, scale: 1.0, orientation: orientation)
+            return correctedFrame
+        }
+        return nil
+    }
+    
+    
+    func currentAsset() -> AVAsset? {
+        return playerController?.player?.currentItem?.asset
+    }
+    
+    
+    func currentAssetTrack() -> AVAssetTrack? {
+        if let currentAsset = currentAsset() {
+            return (currentAsset.tracksWithMediaType(AVMediaTypeVideo).first as AVAssetTrack)
+        }
+        return nil
+    }
+    
+    
+    func changeViewTitleTo(title: String, duration: NSTimeInterval) {
+        if let titleView = self.navigationItem.titleView? as? UILabel {
+            UIView.animateWithDuration(duration/2, animations: {
+                titleView.alpha = 0
+                }, completion: { success in
+                    titleView.text = title
+                    //for some reason this is the only way that would work
+                    UIView.animateWithDuration(duration/2, animations: {
+                        titleView.alpha = 1
+                    })
+            })
+        }
+    }
+    
+    
+    func applyRoundedMask(#view: UIView, cornerRadii: CGFloat, corners: UIRectCorner) {
+        let shape = CAShapeLayer()
+        let mask = CGRect(origin: CGPointMake(0, 0), size: view.frame.size)
+        shape.path = UIBezierPath(roundedRect: mask, byRoundingCorners: corners, cornerRadii: CGSizeMake(cornerRadii, cornerRadii)).CGPath
+        view.layer.mask = shape
+    }
+    
+    
+    func isTouch(touch: CGPoint, inView view: UIView, withPadding padding: CGFloat) -> Bool {
+        let paddedRect = CGRectMake(-padding, -padding, view.frame.width + 2 * padding, view.frame.height + 2 * padding)
+        return CGRectContainsPoint(paddedRect, touch)
     }
     
 }
