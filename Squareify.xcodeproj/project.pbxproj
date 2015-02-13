@@ -13,12 +13,12 @@
 		2E3299841A6318AC00991FD3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2E3299821A6318AC00991FD3 /* Main.storyboard */; };
 		2E3299861A6318AC00991FD3 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2E3299851A6318AC00991FD3 /* Images.xcassets */; };
 		2E3299891A6318AC00991FD3 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2E3299871A6318AC00991FD3 /* LaunchScreen.xib */; };
-		2E3299951A6318AC00991FD3 /* SquareifyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E3299941A6318AC00991FD3 /* SquareifyTests.swift */; };
 		2E3C06EB1A6C4C2A0053E07C /* iAd.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E3C06EA1A6C4C2A0053E07C /* iAd.framework */; };
 		2E3E65211A7F07CE004D9F55 /* SquareifyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E3E65201A7F07CE004D9F55 /* SquareifyController.swift */; };
 		2E8546981A64B2BA00F5FAEB /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E8546971A64B2BA00F5FAEB /* CoreMedia.framework */; };
 		2E85469A1A64B2CA00F5FAEB /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E8546991A64B2CA00F5FAEB /* AVFoundation.framework */; };
 		2E85469C1A64B2D400F5FAEB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E85469B1A64B2D400F5FAEB /* QuartzCore.framework */; };
+		2E89AC2F1A8D70A30006F9E3 /* TimelineHandle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E89AC2E1A8D70A30006F9E3 /* TimelineHandle.swift */; };
 		2E95F1C71A673D78009BD74F /* testvideo.mov in Resources */ = {isa = PBXBuildFile; fileRef = 2E95F1C61A673D78009BD74F /* testvideo.mov */; };
 		2EAA60741A7AF8BD008B3118 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EAA60731A7AF8BD008B3118 /* Photos.framework */; };
 		2ED6A1911A7D6799006032E8 /* style mask with arrow.png in Resources */ = {isa = PBXBuildFile; fileRef = 2ED6A1901A7D6799006032E8 /* style mask with arrow.png */; };
@@ -46,13 +46,12 @@
 		2E3299851A6318AC00991FD3 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		2E3299881A6318AC00991FD3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		2E32998E1A6318AC00991FD3 /* SquareifyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SquareifyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		2E3299931A6318AC00991FD3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		2E3299941A6318AC00991FD3 /* SquareifyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquareifyTests.swift; sourceTree = "<group>"; };
 		2E3C06EA1A6C4C2A0053E07C /* iAd.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iAd.framework; path = System/Library/Frameworks/iAd.framework; sourceTree = SDKROOT; };
 		2E3E65201A7F07CE004D9F55 /* SquareifyController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SquareifyController.swift; sourceTree = "<group>"; };
 		2E8546971A64B2BA00F5FAEB /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		2E8546991A64B2CA00F5FAEB /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		2E85469B1A64B2D400F5FAEB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		2E89AC2E1A8D70A30006F9E3 /* TimelineHandle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimelineHandle.swift; sourceTree = "<group>"; };
 		2E95F1C61A673D78009BD74F /* testvideo.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = testvideo.mov; sourceTree = "<group>"; };
 		2EAA60731A7AF8BD008B3118 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
 		2ED6A1901A7D6799006032E8 /* style mask with arrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "style mask with arrow.png"; sourceTree = "<group>"; };
@@ -94,7 +93,6 @@
 				2E8546971A64B2BA00F5FAEB /* CoreMedia.framework */,
 				2E0807CB1A63809E001B007E /* AVKit.framework */,
 				2E32997B1A6318AC00991FD3 /* Squareify */,
-				2E3299911A6318AC00991FD3 /* SquareifyTests */,
 				2E32997A1A6318AC00991FD3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -116,6 +114,7 @@
 				2E3299801A6318AC00991FD3 /* EditorController.swift */,
 				2E32997E1A6318AC00991FD3 /* AppDelegate.swift */,
 				2EDC8A731A7B0CC40085EE38 /* PickerCell.swift */,
+				2E89AC2E1A8D70A30006F9E3 /* TimelineHandle.swift */,
 				2E3299851A6318AC00991FD3 /* Images.xcassets */,
 				2E3299871A6318AC00991FD3 /* LaunchScreen.xib */,
 				2E32997C1A6318AC00991FD3 /* Supporting Files */,
@@ -130,23 +129,6 @@
 				2ED6A1901A7D6799006032E8 /* style mask with arrow.png */,
 				2E95F1C61A673D78009BD74F /* testvideo.mov */,
 				2E32997D1A6318AC00991FD3 /* Info.plist */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		2E3299911A6318AC00991FD3 /* SquareifyTests */ = {
-			isa = PBXGroup;
-			children = (
-				2E3299941A6318AC00991FD3 /* SquareifyTests.swift */,
-				2E3299921A6318AC00991FD3 /* Supporting Files */,
-			);
-			path = SquareifyTests;
-			sourceTree = "<group>";
-		};
-		2E3299921A6318AC00991FD3 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				2E3299931A6318AC00991FD3 /* Info.plist */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -256,6 +238,7 @@
 			files = (
 				2EDC8A741A7B0CC40085EE38 /* PickerCell.swift in Sources */,
 				2E3299811A6318AC00991FD3 /* EditorController.swift in Sources */,
+				2E89AC2F1A8D70A30006F9E3 /* TimelineHandle.swift in Sources */,
 				2E32997F1A6318AC00991FD3 /* AppDelegate.swift in Sources */,
 				2E3E65211A7F07CE004D9F55 /* SquareifyController.swift in Sources */,
 			);
@@ -265,7 +248,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2E3299951A6318AC00991FD3 /* SquareifyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

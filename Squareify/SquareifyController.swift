@@ -12,12 +12,13 @@ import AVKit
 import AVFoundation
 import iAd
 
+let SQ_COLOR_DARK = UIColor(red: 43/256, green: 132/256, blue: 131/256, alpha: 1.0)
+let SQ_COLOR_MEDIUM = UIColor(red: 56/256, green: 174/256, blue: 172/256, alpha: 1.0)
+let SQ_COLOR_LIGHT = UIColor(red: 95/256, green: 205/256, blue: 204/256, alpha: 1.0)
+
 class SquareifyController : UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, ADBannerViewDelegate, UIGestureRecognizerDelegate {
     
     let BACKGROUND_QUEUE = dispatch_queue_create("Background serial queue", DISPATCH_QUEUE_SERIAL)
-    let COLOR_DARK = UIColor(red: 43/256, green: 132/256, blue: 131/256, alpha: 1.0)
-    let COLOR_MEDIUM = UIColor(red: 56/256, green: 174/256, blue: 172/256, alpha: 1.0)
-    let COLOR_LIGHT = UIColor(red: 95/256, green: 205/256, blue: 204/256, alpha: 1.0)
     
     @IBOutlet weak var playerContainer: UIView!
     @IBOutlet weak var stillFrameViewer: UIImageView!
@@ -32,7 +33,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     @IBOutlet weak var durationEditor: UIView!
     @IBOutlet weak var timelineView: UIView!
-    var timelineHandles: (left: UIView, right: UIView)?
+    var timelineHandles: (left: TimelineHandle, right: TimelineHandle)?
     
     var fetch : PHFetchResult?
     let imageManager = PHImageManager()
@@ -418,6 +419,11 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
                     //animate in handles when left image in on screen
                     if frame == count - 1 {
                         self.animateInHandles()
+                        //bring handles' nonSelectionView to front of timeline after images are presented
+                        if let (right, left) = self.timelineHandles? {
+                            right.addNonSelectionView()
+                            left.addNonSelectionView()
+                        }
                     }
                 })
             })
@@ -447,19 +453,50 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             let handleHeight = timelineView.frame.height + 10
             let handleWidth = CGFloat(10)
             let handleY = timelineView.frame.origin.y - 5
-            let leftHandle = UIView(frame: CGRectMake(timelineView.frame.origin.x, handleY, handleWidth, handleHeight))
-            let rightHandle = UIView(frame: CGRectMake(timelineView.frame.origin.x + timelineView.frame.width - handleWidth , handleY, handleWidth, handleHeight))
+            
+            let leftFrame = CGRectMake(timelineView.frame.origin.x, handleY, handleWidth, handleHeight)
+            let leftHandle = TimelineHandle(frame: leftFrame, timeline: timelineView)
+            let rightFrame = CGRectMake(timelineView.frame.origin.x + timelineView.frame.width - handleWidth , handleY, handleWidth, handleHeight)
+            let rightHandle = TimelineHandle(frame: rightFrame, timeline: timelineView)
             timelineHandles = (left: leftHandle, right: rightHandle)
+            
+            //set up constraint functions
+            leftHandle.xMax = {
+                return rightHandle.frame.origin.x - 15
+            }
+            leftHandle.nonSelectionRect = {
+                //select area to left of handle
+                let width = leftHandle.frame.origin.x - self.timelineView.frame.origin.x
+                return CGRectMake(0, 0, width, self.timelineView.frame.height)
+            }
+            
+            rightHandle.xMin = {
+                return leftHandle.frame.origin.x + 15
+            }
+            rightHandle.xMax = {
+                return self.timelineView.frame.origin.x + self.timelineView.frame.width - handleWidth
+            }
+            rightHandle.nonSelectionRect = {
+                //select area to right of handle
+                let width = (self.timelineView.frame.origin.x + self.timelineView.frame.width) - rightHandle.frame.origin.x + handleWidth
+                return CGRectMake(rightHandle.frame.origin.x - handleWidth/2, 0, width, self.timelineView.frame.height)
+            }
+            
             for handle in [leftHandle, rightHandle] {
-                handle.backgroundColor = COLOR_MEDIUM
+                handle.backgroundColor = SQ_COLOR_MEDIUM
                 applyRoundedMask(view: handle, cornerRadii: 10, corners: .AllCorners)
                 durationEditor.addSubview(handle)
             }
         }
         //reset handles
-        let (leftHandle, rightHandle) = timelineHandles!
-        for handle in [leftHandle, rightHandle] {
-            handle.alpha = 0
+        else {
+            let (leftHandle, rightHandle) = timelineHandles!
+            for handle in [leftHandle, rightHandle] {
+                handle.alpha = 0
+                handle.nonSelectionView.alpha = 0
+            }
+            leftHandle.updatePosition(leftHandle.xMin())
+            rightHandle.updatePosition(rightHandle.xMax())
         }
     }
     
@@ -468,7 +505,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     * Duration Editor use functions
     */
     
-    var grabbedHandle : UIView?
+    var grabbedHandle : TimelineHandle?
     
     @IBAction func durationEditorPanRecognized(pan: UIPanGestureRecognizer) {
         let panLoc = pan.locationInView(durationEditor)
@@ -477,6 +514,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             if let (leftHandle, rightHandle) = self.timelineHandles? {
                 if self.isTouch(pan.locationInView(leftHandle), inView: leftHandle, withPadding: 25) {
                     grabbedHandle = leftHandle
+                    playerController!.player.pause()
                 }
                 else if self.isTouch(pan.locationInView(rightHandle), inView: rightHandle, withPadding: 25) {
                     grabbedHandle = rightHandle
@@ -485,12 +523,35 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         }
         
         if let handle = grabbedHandle {
-            handle.frame.origin = CGPointMake(panLoc.x, handle.frame.origin.y)
+            handle.updatePosition(panLoc.x)
+            let (startPercent, endPercent, durationPercent) = getSelectedPercentage()
+            if handle == timelineHandles!.left {
+                let seekSeconds = CMTimeGetSeconds(currentAsset()!.duration) * Float64(startPercent)
+                let seekTime = CMTimeMakeWithSeconds(seekSeconds, currentAsset()!.duration.timescale)
+                playerController!.player.seekToTime(seekTime)
+            }
         }
         
         if pan.state == .Ended {
+            if grabbedHandle == timelineHandles!.left {
+                playerController!.player.play()
+            }
             grabbedHandle = nil
         }
+    }
+    
+    
+    func getSelectedPercentage() -> (start: CGFloat, end: CGFloat, total: CGFloat) {
+        if self.currentMode == .Duration {
+            if let (left, right) = timelineHandles {
+                let selectionLeft = left.frame.origin.x - timelineView.frame.origin.x
+                let selectionRight = (right.frame.origin.x + right.frame.width) - timelineView.frame.origin.x
+                let leftPercent = selectionLeft / timelineView.frame.width
+                let rightPercent = selectionRight / timelineView.frame.width
+                return (start: leftPercent, end: rightPercent, total: rightPercent - leftPercent)
+            }
+        }
+        return (start: 0, end: 1, total: 1)
     }
     
     
