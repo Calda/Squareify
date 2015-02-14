@@ -106,6 +106,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         //add gesture recognizer
         let edgePanRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: "edgePanTrigger:")
         edgePanRecognizer.edges = .Left
+        edgePanRecognizer.delegate = self
         self.view.addGestureRecognizer(edgePanRecognizer)
         
         //change title view
@@ -340,19 +341,25 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         })
         nextBarButton.enabled = true
     }
-    
+
     
     func edgePanTrigger(sender: UIScreenEdgePanGestureRecognizer) {
         if currentMode == .Duration {
             //keep edge pan from working when on top of timeline
-            let panLocation = sender.locationInView(durationEditor)
-            let zoneTop = timelineView.frame.origin.y - 20
-            let zoneBottom = timelineView.frame.origin.y + timelineView.frame.height + 20
-            let allowEdgePan = !(panLocation.y > zoneTop && panLocation.y < zoneBottom)
-            if allowEdgePan {
-                backButtonPressed(sender)
+            if sender.state == UIGestureRecognizerState.Began {
+                let panLocation = sender.locationInView(durationEditor)
+                let zoneTop = timelineView.frame.origin.y - 20
+                let zoneBottom = timelineView.frame.origin.y + timelineView.frame.height + 20
+                let allowEdgePan = !(panLocation.y > zoneTop && panLocation.y < zoneBottom)
+                if allowEdgePan {
+                    backButtonPressed(sender)
+                }
             }
         }
+    }
+    
+    func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
     }
     
     
@@ -458,6 +465,8 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             let leftHandle = TimelineHandle(frame: leftFrame, timeline: timelineView)
             let rightFrame = CGRectMake(timelineView.frame.origin.x + timelineView.frame.width - handleWidth , handleY, handleWidth, handleHeight)
             let rightHandle = TimelineHandle(frame: rightFrame, timeline: timelineView)
+            leftHandle.alpha = 0
+            rightHandle.alpha = 0
             timelineHandles = (left: leftHandle, right: rightHandle)
             
             //set up constraint functions
@@ -514,44 +523,54 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             if let (leftHandle, rightHandle) = self.timelineHandles? {
                 if self.isTouch(pan.locationInView(leftHandle), inView: leftHandle, withPadding: 25) {
                     grabbedHandle = leftHandle
-                    playerController!.player.pause()
                 }
                 else if self.isTouch(pan.locationInView(rightHandle), inView: rightHandle, withPadding: 25) {
                     grabbedHandle = rightHandle
+                }
+                if grabbedHandle != nil {
+                    playerController!.player.pause()
                 }
             }
         }
         
         if let handle = grabbedHandle {
             handle.updatePosition(panLoc.x)
-            let (startPercent, endPercent, durationPercent) = getSelectedPercentage()
-            if handle == timelineHandles!.left {
-                let seekSeconds = CMTimeGetSeconds(currentAsset()!.duration) * Float64(startPercent)
-                let seekTime = CMTimeMakeWithSeconds(seekSeconds, currentAsset()!.duration.timescale)
-                playerController!.player.seekToTime(seekTime)
-            }
+            let (startTime, endTime, _) = getSelectionRange()
+            let seekTime = (grabbedHandle == timelineHandles!.left ? startTime : endTime)
+            playerController!.player.seekToTime(seekTime, toleranceBefore: CMTimeMake(1,10), toleranceAfter: CMTimeMake(1,10))
         }
         
         if pan.state == .Ended {
-            if grabbedHandle == timelineHandles!.left {
-                playerController!.player.play()
+            playerController!.player.play()
+            if grabbedHandle == timelineHandles!.right {
+                playerController!.player.seekToTime(getSelectionRange().start, toleranceBefore: CMTimeMake(1,10), toleranceAfter: CMTimeMake(1,10))
+                startCustomEndListener()
             }
             grabbedHandle = nil
         }
     }
     
     
-    func getSelectedPercentage() -> (start: CGFloat, end: CGFloat, total: CGFloat) {
+    func getSelectionRange() -> (start: CMTime, end: CMTime, range: CMTimeRange) {
+        let assetDuration = currentAsset()!.duration
+        
+        func percentageToTime(percent: CGFloat) -> CMTime {
+            let seconds = CMTimeGetSeconds(assetDuration) * Float64(percent)
+            return CMTimeMakeWithSeconds(seconds, assetDuration.timescale)
+        }
+        
         if self.currentMode == .Duration {
             if let (left, right) = timelineHandles {
                 let selectionLeft = left.frame.origin.x - timelineView.frame.origin.x
                 let selectionRight = (right.frame.origin.x + right.frame.width) - timelineView.frame.origin.x
-                let leftPercent = selectionLeft / timelineView.frame.width
-                let rightPercent = selectionRight / timelineView.frame.width
-                return (start: leftPercent, end: rightPercent, total: rightPercent - leftPercent)
+                let startTime = percentageToTime(selectionLeft / timelineView.frame.width)
+                let endTime = percentageToTime(selectionRight / timelineView.frame.width)
+                let duration = CMTimeRangeMake(startTime, CMTimeSubtract(endTime, startTime))
+                return (start: startTime, end: endTime, range: duration)
             }
         }
-        return (start: 0, end: 1, total: 1)
+        
+        return (start: kCMTimeZero, end: assetDuration, range: CMTimeRangeMake(kCMTimeZero, assetDuration))
     }
     
     
@@ -605,20 +624,53 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     
     //called when video ends, if the view is on screen
-    func loopPlayerVideo(){
+    func loopPlayerVideo() {
         if self.isViewLoaded() && self.view.window != nil {
-            playerController?.player.seekToTime(kCMTimeZero)
+            playerController?.player.seekToTime(self.getSelectionRange().start)
             playerController?.player.play()
         }
     }
     
+    
+    var customListenerInProgress = false
+    
+    func startCustomEndListener() {
+        if !customListenerInProgress {
+            customEndListener()
+            customListenerInProgress = true
+        }
+    }
+    
+    
+    func customEndListener() {
+        if let currentTime = playerController?.player?.currentTime() {
+            let endTime = self.getSelectionRange().end
+            if CMTimeGetSeconds(currentTime) > CMTimeGetSeconds(endTime) {
+                loopPlayerVideo()
+            }
+            if CMTimeCompare(currentAsset()!.duration, endTime) != 0 { //times are not equal
+                delay(0.1, closure: {
+                    self.customEndListener()
+                })
+            } else {
+                customListenerInProgress = false
+            }
+        }
+        
+    }
+    
+    
+    func delay(delay:Double, closure:()->()) {
+        let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay * Double(NSEC_PER_SEC)))
+        dispatch_after(time, dispatch_get_main_queue(), closure)
+    }
     
     /**
     * Utility Functions
     */
     
     //retreive images from videos
-    func getImageFromCurrentSelectionAtTime(time: CMTime, exact: Bool) -> UIImage?{
+    func getImageFromCurrentSelectionAtTime(time: CMTime, exact: Bool) -> UIImage? {
         if let currentSelection = currentAsset() {
             let assetTrack = (currentSelection.tracksWithMediaType(AVMediaTypeVideo).first as AVAssetTrack)
             let transformedDims = CGSizeApplyAffineTransform(assetTrack.naturalSize, assetTrack.preferredTransform)
