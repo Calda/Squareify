@@ -34,6 +34,13 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBOutlet weak var durationEditor: UIView!
     @IBOutlet weak var timelineView: UIView!
     var timelineHandles: (left: TimelineHandle, right: TimelineHandle)?
+    @IBOutlet weak var durationDisplay: UILabel!
+    @IBOutlet weak var instagramIcon: UIImageView!
+    @IBOutlet weak var instagramAllowText: UILabel!
+    @IBOutlet weak var instagramCanPost: UILabel!
+    @IBOutlet weak var vineIcon: UIImageView!
+    @IBOutlet weak var vineAllowText: UILabel!
+    @IBOutlet weak var vineCanPost: UILabel!
     
     var fetch : PHFetchResult?
     let imageManager = PHImageManager()
@@ -259,7 +266,12 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     }
     
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
-        return CGSize(width: 90, height: 90)
+        let gutterSize = 2
+        let screenWidth = view.frame.width
+        let countPerRow = (screenWidth > 350 ? 4 : 3) //show 3 videos per row on 5s and 4s
+        let avaliableWidth = screenWidth - CGFloat((countPerRow - 1) * gutterSize)
+        let widthPerView = avaliableWidth / CGFloat(countPerRow)
+        return CGSize(width: widthPerView, height: widthPerView)
     }
     
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAtIndex section: Int) -> UIEdgeInsets {
@@ -267,11 +279,11 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     }
     
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAtIndex section: Int) -> CGFloat {
-        return 1
+        return 0
     }
     
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAtIndex section: Int) -> CGFloat {
-        return 5
+        return 2
     }
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
@@ -295,12 +307,14 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         currentMode = .Duration
         changeViewTitleTo("Trim Clip", duration: 0.5)
         prepareDurationEditor()
-        let newPickerOrigin = CGPointMake(-self.view.frame.width * 2, pickerCollection.frame.origin.y)
+        let newPickerOrigin = CGPointMake(self.view.frame.width * -1.2, pickerCollection.frame.origin.y)
+        pickerCollection.frame.origin = originalPickerPosition!
         UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
                 self.pickerCollection.frame.origin = newPickerOrigin
             }, completion: { success in
                 if self.currentMode != .Picker {
                     self.pickerCollection.hidden = true
+                    self.updateDurationDisplays(self.currentAsset()!.duration)
                 }
         })
         durationEditor.frame.origin = originalDurationEditorPosition!
@@ -333,6 +347,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             }, completion: { success in
                 if self.currentMode != .Duration {
                     self.durationEditor.hidden = true
+                    self.durationDisplay.text = ""
                 }
         })
         backBarButton.enabled = false
@@ -451,12 +466,15 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
                     }, completion: nil)
             }
         }
+        updateDurationDisplays(currentAsset()!.duration)
     }
     
     
     func resetTimelineControls() {
         //create handles
         if timelineHandles == nil { //is first time showing clip trimmer
+            self.applyRoundedMask(view: self.durationDisplay, cornerRadii: 20, corners: UIRectCorner.AllCorners)
+            
             let handleHeight = timelineView.frame.height + 10
             let handleWidth = CGFloat(10)
             let handleY = timelineView.frame.origin.y - 5
@@ -535,9 +553,10 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         
         if let handle = grabbedHandle {
             handle.updatePosition(panLoc.x)
-            let (startTime, endTime, _) = getSelectionRange()
+            let (startTime, endTime, range) = getSelectionRange()
             let seekTime = (grabbedHandle == timelineHandles!.left ? startTime : endTime)
             playerController!.player.seekToTime(seekTime, toleranceBefore: CMTimeMake(1,10), toleranceAfter: CMTimeMake(1,10))
+            updateDurationDisplays(range.duration)
         }
         
         if pan.state == .Ended {
@@ -571,6 +590,49 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         }
         
         return (start: kCMTimeZero, end: assetDuration, range: CMTimeRangeMake(kCMTimeZero, assetDuration))
+    }
+    
+    
+    func updateDurationDisplays(duration: CMTime) {
+        self.durationDisplay.text = self.timeToDecoratedString(duration)
+        let durationSeconds = CMTimeGetSeconds(duration)
+        
+        func durationAllowed(image: UIImageView, timeText: UILabel, canPostText: UILabel) {
+            if image.alpha != 1 { //image needs animation change
+                image.alpha = 1
+                let newTimeTextPosition = CGPointMake(timeText.frame.origin.x, timeText.frame.origin.y - 30)
+                let newCanPostTextPosition = CGPointMake(canPostText.frame.origin.x, canPostText.frame.origin.y - 30)
+                UIView.animateWithDuration(0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: nil, animations: {
+                    timeText.frame.origin = newTimeTextPosition
+                    canPostText.frame.origin = newCanPostTextPosition
+                }, completion: nil)
+            }
+        }
+        
+        func durationNotAllowed(image: UIImageView, timeText: UILabel, canPostText: UILabel) {
+            if image.alpha == 1 { //image needs animation change
+                image.alpha = 0.35
+                let newTimeTextPosition = CGPointMake(timeText.frame.origin.x, timeText.frame.origin.y + 30)
+                let newCanPostTextPosition = CGPointMake(canPostText.frame.origin.x, canPostText.frame.origin.y + 30)
+                UIView.animateWithDuration(0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: nil, animations: {
+                    timeText.frame.origin = newTimeTextPosition
+                    canPostText.frame.origin = newCanPostTextPosition
+                }, completion: nil)
+            }
+        }
+        
+        if durationSeconds > 15.0 {
+            durationNotAllowed(instagramIcon, instagramAllowText, instagramCanPost)
+        } else {
+            durationAllowed(instagramIcon, instagramAllowText, instagramCanPost)
+        }
+        
+        if durationSeconds > 6.0 {
+            durationNotAllowed(vineIcon, vineAllowText, vineCanPost)
+        } else {
+            durationAllowed(vineIcon, vineAllowText, vineCanPost)
+        }
+        
     }
     
     
@@ -622,48 +684,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         }
     }
     
-    
-    //called when video ends, if the view is on screen
-    func loopPlayerVideo() {
-        if self.isViewLoaded() && self.view.window != nil {
-            playerController?.player.seekToTime(self.getSelectionRange().start)
-            playerController?.player.play()
-        }
-    }
-    
-    
-    var customListenerInProgress = false
-    
-    func startCustomEndListener() {
-        if !customListenerInProgress {
-            customEndListener()
-            customListenerInProgress = true
-        }
-    }
-    
-    
-    func customEndListener() {
-        if let currentTime = playerController?.player?.currentTime() {
-            let endTime = self.getSelectionRange().end
-            if CMTimeGetSeconds(currentTime) > CMTimeGetSeconds(endTime) {
-                loopPlayerVideo()
-            }
-            if CMTimeCompare(currentAsset()!.duration, endTime) != 0 { //times are not equal
-                delay(0.1, closure: {
-                    self.customEndListener()
-                })
-            } else {
-                customListenerInProgress = false
-            }
-        }
-        
-    }
-    
-    
-    func delay(delay:Double, closure:()->()) {
-        let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay * Double(NSEC_PER_SEC)))
-        dispatch_after(time, dispatch_get_main_queue(), closure)
-    }
     
     /**
     * Utility Functions
@@ -729,5 +749,64 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         let paddedRect = CGRectMake(-padding, -padding, view.frame.width + 2 * padding, view.frame.height + 2 * padding)
         return CGRectContainsPoint(paddedRect, touch)
     }
+    
+    
+    func timeToDecoratedString(time: CMTime) -> String {
+        let timeInSeconds = CMTimeGetSeconds(time) + Float64(0.1)
+        let minutes = Int(timeInSeconds) / 60
+        let seconds = Int(timeInSeconds) % 60
+        if minutes > 0 {
+            let secondsString = (seconds < 10 ? "0" : "") + "\(seconds)"
+            return "\(minutes):\(secondsString)"
+        }
+        else {
+            let tenths = Int(timeInSeconds * 10) % 10
+            return "\(seconds).\(tenths)"
+        }
+    }
+    
+    
+    //called when video ends, if the view is on screen
+    func loopPlayerVideo() {
+        if self.isViewLoaded() && self.view.window != nil {
+            playerController?.player.seekToTime(self.getSelectionRange().start)
+            playerController?.player.play()
+        }
+    }
+    
+    
+    var customListenerInProgress = false
+    func startCustomEndListener() {
+        if !customListenerInProgress {
+            customListenerInProgress = true
+            customEndListener()
+        }
+    }
+    
+    
+    func customEndListener() {
+        if let currentTime = playerController?.player?.currentTime() {
+            let endTime = self.getSelectionRange().end
+            if CMTimeGetSeconds(currentTime) > CMTimeGetSeconds(endTime) {
+                loopPlayerVideo()
+            }
+            let endTimeSeconds = CMTimeGetSeconds(endTime)
+            if CMTimeCompare(currentAsset()!.duration, endTime) != 0 { //times are not equal
+                delay(0.1, closure: {
+                    self.customEndListener()
+                })
+            } else {
+                customListenerInProgress = false
+            }
+        }
+        
+    }
+    
+    
+    func delay(delay:Double, closure:()->()) {
+        let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay * Double(NSEC_PER_SEC)))
+        dispatch_after(time, dispatch_get_main_queue(), closure)
+    }
+
     
 }
