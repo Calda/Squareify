@@ -29,9 +29,13 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBOutlet weak var styleArrow: UIImageView!
     @IBOutlet weak var adBanner: ADBannerView!
     
+    @IBOutlet weak var pageContainer: UIView!
+    @IBOutlet weak var pageContainerLeftConstraint: NSLayoutConstraint!
+    @IBOutlet weak var noVideosMessage: UIView!
+    
     @IBOutlet weak var pickerCollection: UICollectionView!
-    @IBOutlet weak var pickerConstraintBottomGuide: NSLayoutConstraint!
-    @IBOutlet weak var pickerConstraintBottomAd: NSLayoutConstraint!
+    @IBOutlet weak var pageConstraintBottomGuide: NSLayoutConstraint!
+    @IBOutlet weak var pageConstraintBottomAd: NSLayoutConstraint!
     
     @IBOutlet weak var durationEditor: UIView!
     @IBOutlet weak var timelineView: UIView!
@@ -59,9 +63,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     var originalPlayerPosition : CGPoint?
     var originalStillViewerPosition : CGPoint?
     var originalArrowPosition : CGPoint?
-    var originalDurationEditorPosition : CGPoint?
-    var originalPickerPosition : CGPoint?
-    var originalTimelineFrame : CGRect?
+    var originalPagePosition : CGPoint?
     
     //the current view of the app
     enum SquareifyMode {
@@ -82,6 +84,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             playerContainerAspectConstraint.constant = -20
             playerContainerMarginConstraint.constant = -40
         }
+        displayVideoThumbnails()
         //get photos auth
         let authorization = PHPhotoLibrary.authorizationStatus()
         if authorization == PHAuthorizationStatus.NotDetermined {
@@ -90,9 +93,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
                     self.displayVideoThumbnails()
                 }
             }
-        }
-        else if authorization == PHAuthorizationStatus.Authorized {
-            displayVideoThumbnails()
         }
     }
     
@@ -111,10 +111,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             originalPlayerPosition = playerContainer.frame.origin
             originalStillViewerPosition = stillFrameViewer.frame.origin
             originalArrowPosition = styleArrow.frame.origin
-            originalDurationEditorPosition = CGPointMake(self.view.frame.width, durationEditor.frame.origin.y)
-            durationEditor.frame.origin = originalDurationEditorPosition!
-            originalPickerPosition = pickerCollection.frame.origin
-            originalTimelineFrame = timelineView.frame
+            originalPagePosition = pageContainer.frame.origin
             
             //add gesture recognizer
             let edgePanRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: "edgePanTrigger:")
@@ -151,8 +148,14 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         let videoOptions = PHFetchOptions()
         videoOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
         fetch = PHAsset.fetchAssetsWithMediaType(PHAssetMediaType.Video, options: videoOptions)
-        self.automaticallyAdjustsScrollViewInsets = false
-        pickerCollection.reloadData()
+        if fetch == nil || fetch!.count == 0 {
+            noVideosMessage.hidden = false
+        }
+        else {
+            noVideosMessage.hidden = true
+            self.automaticallyAdjustsScrollViewInsets = false
+            pickerCollection.reloadData()
+        }
     }
     
     //displays user selected video, unselects previous
@@ -323,25 +326,18 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         currentMode = .Duration
         changeViewTitleTo("Trim Clip", duration: 0.5)
         prepareDurationEditor()
-        pickerCollection.frame.origin = originalPickerPosition!
-        let newPickerOrigin = CGPointMake(self.view.frame.width * -1.2, pickerCollection.frame.origin.y)
-        durationEditor.frame.origin = originalDurationEditorPosition!
-        durationEditor.hidden = false
-        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
-                self.pickerCollection.frame.origin = newPickerOrigin
-                self.durationEditor.frame.origin = self.originalPickerPosition!
-            }, completion: { success in
-                if self.currentMode != .Picker {
-                    self.pickerCollection.hidden = true
-                    self.updateDurationDisplays(self.currentAsset()!.duration)
-                    //self.durationEditor.frame.origin = self.originalPickerPosition!
-                }
-        })
+        
         nextBarButton.enabled = false
         UIView.animateWithDuration(0.5, animations: {
             self.backBarButton.tintColor = self.nextBarButton.tintColor
         })
         backBarButton.enabled = true
+        
+        let newPagePosition = CGPointMake(originalPagePosition!.x - view.frame.width, originalPagePosition!.y)
+        pageContainerLeftConstraint.constant = -view.frame.width
+        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
+            self.pageContainer.frame.origin = newPagePosition
+            }, completion: nil)
     }
     
     
@@ -351,24 +347,17 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         }
         changeViewTitleTo("Squareify", duration: 0.5)
         currentMode = .Picker
-        pickerCollection.frame.origin = CGPointMake(-self.view.frame.width * 2, pickerCollection.frame.origin.y)
-        pickerCollection.hidden = false
-        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
-            self.pickerCollection.frame.origin = self.originalPickerPosition!
-            }, completion: nil)
-        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
-                self.durationEditor.frame.origin = self.originalDurationEditorPosition!
-            }, completion: { success in
-                if self.currentMode != .Duration {
-                    self.durationEditor.hidden = true
-                    self.durationDisplay.text = ""
-                }
-        })
+        
         backBarButton.enabled = false
         UIView.animateWithDuration(0.5, animations: {
             self.backBarButton.tintColor = UIColor.clearColor()
         })
         nextBarButton.enabled = true
+        
+        pageContainerLeftConstraint.constant = 0
+        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
+            self.pageContainer.frame.origin = self.originalPagePosition!
+        }, completion: nil)
     }
 
     
@@ -397,6 +386,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     */
     
     func prepareDurationEditor() {
+        updateDurationDisplays(currentAsset()!.duration)
         resetTimelineControls()
         populateTimelineView()
     }
@@ -480,14 +470,13 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
                     }, completion: nil)
             }
         }
-        updateDurationDisplays(currentAsset()!.duration)
     }
     
     
     func resetTimelineControls() {
         //create handles
         if timelineHandles == nil { //is first time showing clip trimmer
-            self.applyRoundedMask(view: self.durationDisplay, cornerRadii: 20, corners: UIRectCorner.AllCorners)
+            self.applyRoundedMask(view: self.durationDisplay, cornerRadii: 15, corners: UIRectCorner.AllCorners)
             
             let handleHeight = timelineView.frame.height + 10
             let handleWidth = CGFloat(10)
@@ -680,8 +669,8 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
                 banner.frame.origin = newBannerPosition
                 self.pickerCollection.frame.size = newPickerSize
             }, completion: { success in
-                self.pickerConstraintBottomGuide.active = false
-                self.pickerConstraintBottomAd.active = true
+                self.pageConstraintBottomGuide.active = false
+                self.pageConstraintBottomAd.active = true
             })
         }
     }
@@ -699,8 +688,8 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
                 self.pickerCollection.frame.size = newPickerSize
             }, completion: { success in
                 banner.hidden = true
-                self.pickerConstraintBottomGuide.active = true
-                self.pickerConstraintBottomAd.active = false
+                self.pageConstraintBottomGuide.active = true
+                self.pageConstraintBottomAd.active = false
             })
         }
     }
