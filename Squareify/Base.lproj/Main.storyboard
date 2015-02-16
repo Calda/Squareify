@@ -17,13 +17,13 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view userInteractionEnabled="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6fM-0Q-KWN" userLabel="Player View">
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6fM-0Q-KWN" userLabel="Player View">
                                 <rect key="frame" x="0.0" y="64" width="320" height="256"/>
                                 <subviews>
                                     <imageView userInteractionEnabled="NO" alpha="0.0" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Xhc-Um-8eo" userLabel="Still Frame Viewer">
                                         <rect key="frame" x="33" y="-35" width="255" height="326"/>
                                     </imageView>
-                                    <containerView hidden="YES" opaque="NO" contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="q4t-xT-zIb" userLabel="Player Container">
+                                    <containerView hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="q4t-xT-zIb" userLabel="Player Container">
                                         <rect key="frame" x="33" y="-35" width="255" height="326"/>
                                         <constraints>
                                             <constraint firstAttribute="width" secondItem="q4t-xT-zIb" secondAttribute="height" multiplier="12.5:16" id="Qrm-K8-y7A"/>
@@ -77,7 +77,29 @@
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vbw-kh-zhQ" userLabel="Letterbox Right">
                                         <rect key="frame" x="288" y="0.0" width="32" height="256"/>
+                                        <subviews>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ZQk-ui-pGM">
+                                                <rect key="frame" x="3" y="221" width="25" height="25"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="25" id="ir7-rm-njQ"/>
+                                                    <constraint firstAttribute="width" constant="25" id="kBC-Cl-B1W"/>
+                                                </constraints>
+                                                <color key="tintColor" red="0.32156862749999998" green="0.80000000000000004" blue="0.79607843140000001" alpha="1" colorSpace="calibratedRGB"/>
+                                                <state key="normal" title="Button" image="unmute-filled">
+                                                    <color key="titleColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                </state>
+                                                <state key="selected" image="unmute"/>
+                                                <state key="highlighted" image="mute-filled"/>
+                                                <connections>
+                                                    <action selector="toggleMute:" destination="blJ-Ad-SC4" eventType="touchDown" id="3AB-IV-eNS"/>
+                                                </connections>
+                                            </button>
+                                        </subviews>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <constraints>
+                                            <constraint firstAttribute="bottom" secondItem="ZQk-ui-pGM" secondAttribute="bottom" constant="10" id="Fdy-OW-l3r"/>
+                                            <constraint firstItem="ZQk-ui-pGM" firstAttribute="leading" secondItem="vbw-kh-zhQ" secondAttribute="leading" constant="3" id="jrC-cM-SWe"/>
+                                        </constraints>
                                     </view>
                                 </subviews>
                                 <constraints>
@@ -254,7 +276,7 @@
                                         </constraints>
                                     </view>
                                 </subviews>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <gestureRecognizers/>
                                 <constraints>
                                     <constraint firstItem="hxy-fY-IWQ" firstAttribute="leading" secondItem="Ugw-ky-wDt" secondAttribute="leading" id="190-Ly-uTO"/>
@@ -313,6 +335,7 @@
                         <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="6fM-0Q-KWN" firstAttribute="top" secondItem="otd-uu-v4I" secondAttribute="bottom" id="02I-LL-Hzi"/>
+                            <constraint firstItem="K4F-yr-JC9" firstAttribute="top" secondItem="HHG-qL-iqb" secondAttribute="bottom" id="3BE-6A-ExD"/>
                             <constraint firstItem="q4t-xT-zIb" firstAttribute="width" secondItem="oB6-Bo-X13" secondAttribute="width" id="3fl-vV-qXz"/>
                             <constraint firstItem="6fM-0Q-KWN" firstAttribute="leading" secondItem="J3h-qN-MqL" secondAttribute="leading" id="4w8-ky-Onp"/>
                             <constraint firstItem="K4F-yr-JC9" firstAttribute="top" secondItem="jMm-3V-9o0" secondAttribute="bottom" id="8vA-zL-swm"/>
@@ -346,6 +369,7 @@
                                 <exclude reference="3fl-vV-qXz"/>
                                 <exclude reference="BwP-GO-C3j"/>
                                 <exclude reference="NdM-lZ-MZA"/>
+                                <exclude reference="3BE-6A-ExD"/>
                                 <exclude reference="8vA-zL-swm"/>
                                 <exclude reference="982-V1-OWq"/>
                                 <exclude reference="Amz-4w-SKu"/>
@@ -381,6 +405,8 @@
                         <outlet property="navigationItem" destination="8QT-2d-43y" id="5qM-oe-OeL"/>
                         <outlet property="nextBarButton" destination="a3h-kk-GOO" id="lAU-X1-G3q"/>
                         <outlet property="pickerCollection" destination="HHG-qL-iqb" id="MRi-j1-MFr"/>
+                        <outlet property="pickerConstraintBottomAd" destination="3BE-6A-ExD" id="phV-eY-LbV"/>
+                        <outlet property="pickerConstraintBottomGuide" destination="qxs-fB-PlR" id="IYJ-Te-AqK"/>
                         <outlet property="playerContainer" destination="q4t-xT-zIb" id="4FF-MR-3Rx"/>
                         <outlet property="playerContainerAspectConstraint" destination="Qrm-K8-y7A" id="xcV-SM-rVp"/>
                         <outlet property="playerContainerMarginConstraint" destination="LAP-YM-M6J" id="PcT-Zh-GSd"/>
@@ -506,8 +532,11 @@
     </scenes>
     <resources>
         <image name="instagram icon 320.png" width="320" height="320"/>
+        <image name="mute-filled" width="30" height="30"/>
         <image name="style mask no arrow.png" width="936" height="936"/>
         <image name="style mask with arrow.png" width="936" height="936"/>
+        <image name="unmute" width="30" height="30"/>
+        <image name="unmute-filled" width="30" height="30"/>
         <image name="vine icon 340.png" width="300" height="300"/>
     </resources>
 </document>

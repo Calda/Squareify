@@ -30,6 +30,8 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBOutlet weak var adBanner: ADBannerView!
     
     @IBOutlet weak var pickerCollection: UICollectionView!
+    @IBOutlet weak var pickerConstraintBottomGuide: NSLayoutConstraint!
+    @IBOutlet weak var pickerConstraintBottomAd: NSLayoutConstraint!
     
     @IBOutlet weak var durationEditor: UIView!
     @IBOutlet weak var timelineView: UIView!
@@ -45,6 +47,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     var fetch : PHFetchResult?
     let imageManager = PHImageManager()
     var playerController : AVPlayerViewController?
+    var playerMuted = true
     
     //will change for iPhone 4S support
     @IBOutlet weak var playerViewAspectConstraint: NSLayoutConstraint!
@@ -70,6 +73,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     override func viewWillAppear(animated: Bool) {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "loopPlayerVideo", name: AVPlayerItemDidPlayToEndTimeNotification, object: nil) //set up video looping
+        AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback, error: nil)
         
         let screenAspect = self.view.frame.width / self.view.frame.height
         if screenAspect > (9.5/16) { //is iPhone 4S
@@ -94,35 +98,38 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     
     override func viewDidAppear(animated: Bool) {
-        //move ad to start off-screen
-        let screenHeight = self.view.frame.height
-        let offScreenOrigin = CGPointMake(0,screenHeight)
-        UIView.animateWithDuration(1.0, animations: {
-            self.adBanner.frame.origin = offScreenOrigin
-        })
-        
-        //save original positions for items that will animate
-        originalPlayerPosition = playerContainer.frame.origin
-        originalStillViewerPosition = stillFrameViewer.frame.origin
-        originalArrowPosition = styleArrow.frame.origin
-        originalDurationEditorPosition = CGPointMake(self.view.frame.width, durationEditor.frame.origin.y)
-        durationEditor.frame.origin = originalDurationEditorPosition!
-        originalPickerPosition = pickerCollection.frame.origin
-        originalTimelineFrame = timelineView.frame
-        
-        //add gesture recognizer
-        let edgePanRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: "edgePanTrigger:")
-        edgePanRecognizer.edges = .Left
-        edgePanRecognizer.delegate = self
-        self.view.addGestureRecognizer(edgePanRecognizer)
-        
-        //change title view
-        let titleView = UILabel(frame: CGRectMake(0, 0, 100, 200))
-        titleView.textAlignment = NSTextAlignment.Center
-        titleView.text = "Squareify"
-        titleView.textColor = UIColor.whiteColor()
-        titleView.font = UIFont(name: "STHeitiSC-Medium", size: 21)
-        navigationItem.titleView = titleView
+        //only run all of these setups on first open
+        if originalPlayerPosition == nil {
+            //move ad to start off-screen
+            let screenHeight = self.view.frame.height
+            let offScreenOrigin = CGPointMake(0,screenHeight)
+            UIView.animateWithDuration(1.0, animations: {
+                self.adBanner.frame.origin = offScreenOrigin
+            })
+            
+            //save original positions for items that will animate
+            originalPlayerPosition = playerContainer.frame.origin
+            originalStillViewerPosition = stillFrameViewer.frame.origin
+            originalArrowPosition = styleArrow.frame.origin
+            originalDurationEditorPosition = CGPointMake(self.view.frame.width, durationEditor.frame.origin.y)
+            durationEditor.frame.origin = originalDurationEditorPosition!
+            originalPickerPosition = pickerCollection.frame.origin
+            originalTimelineFrame = timelineView.frame
+            
+            //add gesture recognizer
+            let edgePanRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: "edgePanTrigger:")
+            edgePanRecognizer.edges = .Left
+            edgePanRecognizer.delegate = self
+            self.view.addGestureRecognizer(edgePanRecognizer)
+            
+            //change title view
+            let titleView = UILabel(frame: CGRectMake(0, 0, 100, 200))
+            titleView.textAlignment = NSTextAlignment.Center
+            titleView.text = "Squareify"
+            titleView.textColor = UIColor.whiteColor()
+            titleView.font = UIFont(name: "STHeitiSC-Medium", size: 21)
+            navigationItem.titleView = titleView
+        }
     }
     
     
@@ -147,7 +154,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         self.automaticallyAdjustsScrollViewInsets = false
         pickerCollection.reloadData()
     }
-    
     
     //displays user selected video, unselects previous
     var currentSelected : NSIndexPath?
@@ -177,6 +183,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
                 self.playerController?.videoGravity = "AVLayerVideoGravityResizeAspectFill"
                 self.playerController?.player = AVPlayer(playerItem: AVPlayerItem(asset: video))
                 self.playerController?.player.play()
+                self.playerController?.player.volume = (self.playerMuted ? 0 : 1)
             })
             //animate in player
             playerContainer.frame.origin = CGPointMake(-playerContainer.frame.width, playerContainer.frame.origin.y)
@@ -221,6 +228,15 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         //setup embeded viewer
         if segue.identifier? == "embedViewer" {
             playerController = (segue.destinationViewController as AVPlayerViewController)
+        }
+    }
+    
+    
+    @IBAction func toggleMute(sender: UIButton) {
+        playerMuted = !playerMuted
+        sender.setImage(UIImage(named: (playerMuted ? "unmute-filled" : "mute")), forState: UIControlState.Normal)
+        if let player = playerController?.player? {
+            player.volume = playerMuted ? 0 : 1
         }
     }
     
@@ -307,22 +323,20 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         currentMode = .Duration
         changeViewTitleTo("Trim Clip", duration: 0.5)
         prepareDurationEditor()
-        let newPickerOrigin = CGPointMake(self.view.frame.width * -1.2, pickerCollection.frame.origin.y)
         pickerCollection.frame.origin = originalPickerPosition!
+        let newPickerOrigin = CGPointMake(self.view.frame.width * -1.2, pickerCollection.frame.origin.y)
+        durationEditor.frame.origin = originalDurationEditorPosition!
+        durationEditor.hidden = false
         UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
                 self.pickerCollection.frame.origin = newPickerOrigin
+                self.durationEditor.frame.origin = self.originalPickerPosition!
             }, completion: { success in
                 if self.currentMode != .Picker {
                     self.pickerCollection.hidden = true
                     self.updateDurationDisplays(self.currentAsset()!.duration)
+                    //self.durationEditor.frame.origin = self.originalPickerPosition!
                 }
         })
-        durationEditor.frame.origin = originalDurationEditorPosition!
-        durationEditor.hidden = false
-        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
-                self.durationEditor.frame.origin = self.originalPickerPosition!
-            }, completion: nil)
-        
         nextBarButton.enabled = false
         UIView.animateWithDuration(0.5, animations: {
             self.backBarButton.tintColor = self.nextBarButton.tintColor
@@ -665,7 +679,10 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
                 banner.frame.origin = newBannerPosition
                 self.pickerCollection.frame.size = newPickerSize
-                }, completion: nil)
+            }, completion: { success in
+                self.pickerConstraintBottomGuide.active = false
+                self.pickerConstraintBottomAd.active = true
+            })
         }
     }
     
@@ -680,7 +697,11 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
                 banner.frame.origin = bannerOffScreen
                 self.pickerCollection.frame.size = newPickerSize
-                }, completion: { success in banner.hidden = true })
+            }, completion: { success in
+                banner.hidden = true
+                self.pickerConstraintBottomGuide.active = true
+                self.pickerConstraintBottomAd.active = false
+            })
         }
     }
     
@@ -769,7 +790,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     //called when video ends, if the view is on screen
     func loopPlayerVideo() {
         if self.isViewLoaded() && self.view.window != nil {
-            playerController?.player.seekToTime(self.getSelectionRange().start)
+            playerController?.player.seekToTime(self.getSelectionRange().start, toleranceBefore: kCMTimeZero, toleranceAfter: kCMTimeZero)
             playerController?.player.play()
         }
     }
