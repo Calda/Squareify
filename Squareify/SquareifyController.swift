@@ -25,9 +25,9 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBOutlet weak var welcomeView: UIView!
     @IBOutlet weak var nextBarButton: UIBarButtonItem!
     @IBOutlet weak var backBarButton: UIBarButtonItem!
-    @IBOutlet weak var playerView: UIView!
-    @IBOutlet weak var styleArrow: UIImageView!
+    @IBOutlet weak var playerView: PlayerView!
     @IBOutlet weak var adBanner: ADBannerView!
+    @IBOutlet weak var adPositionConstraint: NSLayoutConstraint!
     
     @IBOutlet weak var pageContainer: UIView!
     @IBOutlet weak var pageContainerLeftConstraint: NSLayoutConstraint!
@@ -36,6 +36,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBOutlet weak var pickerCollection: UICollectionView!
     @IBOutlet weak var pageConstraintBottomGuide: NSLayoutConstraint!
     @IBOutlet weak var pageConstraintBottomAd: NSLayoutConstraint!
+    @IBOutlet weak var playerContainerPosition: NSLayoutConstraint!
     
     @IBOutlet weak var durationEditor: UIView!
     @IBOutlet weak var timelineView: UIView!
@@ -60,9 +61,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBOutlet weak var playerContainerMarginConstraint: NSLayoutConstraint!
     
     //original configuations for items that will animate
-    var originalPlayerPosition : CGPoint?
-    var originalStillViewerPosition : CGPoint?
-    var originalArrowPosition : CGPoint?
     var originalPagePosition : CGPoint?
     
     //the current view of the app
@@ -79,11 +77,14 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         
         let screenAspect = self.view.frame.width / self.view.frame.height
         if screenAspect > (9.5/16) { //is iPhone 4S
-            playerViewAspectConstraint.constant = 100
             welcomeText.font = UIFont(name: welcomeText!.font.fontName, size: 22)
             playerContainerAspectConstraint.constant = -20
             playerContainerMarginConstraint.constant = -40
+            playerView.REQUIRED_OFFEST = -75
+            playerView.modifyOffsetBy(0, duration: 0, dampening: 1)
         }
+        playerView.preferHeight(0, duration: 0, dampening: 1)
+        
         displayVideoThumbnails()
         //get photos auth
         let authorization = PHPhotoLibrary.authorizationStatus()
@@ -98,35 +99,21 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     
     override func viewDidAppear(animated: Bool) {
-        //only run all of these setups on first open
-        if originalPlayerPosition == nil {
-            //move ad to start off-screen
-            let screenHeight = self.view.frame.height
-            let offScreenOrigin = CGPointMake(0,screenHeight)
-            UIView.animateWithDuration(1.0, animations: {
-                self.adBanner.frame.origin = offScreenOrigin
-            })
-            
-            //save original positions for items that will animate
-            originalPlayerPosition = playerContainer.frame.origin
-            originalStillViewerPosition = stillFrameViewer.frame.origin
-            originalArrowPosition = styleArrow.frame.origin
-            originalPagePosition = pageContainer.frame.origin
-            
-            //add gesture recognizer
-            let edgePanRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: "edgePanTrigger:")
-            edgePanRecognizer.edges = .Left
-            edgePanRecognizer.delegate = self
-            self.view.addGestureRecognizer(edgePanRecognizer)
-            
-            //change title view
-            let titleView = UILabel(frame: CGRectMake(0, 0, 100, 200))
-            titleView.textAlignment = NSTextAlignment.Center
-            titleView.text = "Squareify"
-            titleView.textColor = UIColor.whiteColor()
-            titleView.font = UIFont(name: "STHeitiSC-Medium", size: 21)
-            navigationItem.titleView = titleView
-        }
+        println(animated)
+        playerView.preferAspect(1.25, duration: 1.0, dampening: 0.8)
+        
+        let edgePanRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: "edgePanTrigger:")
+        edgePanRecognizer.edges = .Left
+        edgePanRecognizer.delegate = self
+        self.view.addGestureRecognizer(edgePanRecognizer)
+        
+        //change title view
+        let titleView = UILabel(frame: CGRectMake(0, 0, 100, 200))
+        titleView.textAlignment = NSTextAlignment.Center
+        titleView.text = "Squareify"
+        titleView.textColor = UIColor.whiteColor()
+        titleView.font = UIFont(name: "STHeitiSC-Medium", size: 21)
+        navigationItem.titleView = titleView
     }
     
     
@@ -160,13 +147,16 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     //displays user selected video, unselects previous
     var currentSelected : NSIndexPath?
+    
     func selectAndDisplay(selectionIndex: NSIndexPath) {
+        //swap selected cell
         if let previousIndex = currentSelected {
             let previousCell = pickerCollection.cellForItemAtIndexPath(previousIndex) as PickerCell?
             previousCell?.deselectCell()
         } else { //this is the first video selected
             nextBarButton.enabled = true
         }
+        
         let currentCell = pickerCollection.cellForItemAtIndexPath(selectionIndex) as PickerCell?
         currentCell?.selectCell()
         currentSelected = selectionIndex
@@ -176,8 +166,10 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             playerController!.player.pause()
             stillFrameViewer.image = self.getImageFromCurrentSelectionAtTime(playerController!.player.currentTime(), exact: true)
             stillFrameViewer.alpha = 1
-            stillFrameViewer.frame.origin = originalStillViewerPosition!
         }
+        
+        playerContainerPosition.constant = -playerContainer.frame.width
+        view.layoutIfNeeded()
         
         //get asset for new video
         let index = selectionIndex.indexAtPosition(1)
@@ -189,39 +181,19 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
                 self.playerController?.player.volume = (self.playerMuted ? 0 : 1)
             })
             //animate in player
-            playerContainer.frame.origin = CGPointMake(-playerContainer.frame.width, playerContainer.frame.origin.y)
+            playerContainerPosition.constant = 0
             UIView.animateWithDuration(1.0, delay: 0.25, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
-                    self.playerContainer.frame.origin = self.originalPlayerPosition!
-                }, completion: nil)
+                    self.view.layoutIfNeeded()
+            }, completion: nil)
             
-            if !welcomeView.hidden { //is first selection
+            if !welcomeView.hidden { //is first selection, animate out welcome view
                 playerContainer.hidden = false
-                let arrowStart = CGPointMake(-styleArrow.frame.width, styleArrow.frame.origin.y)
-                styleArrow.frame.origin = arrowStart
                 let welcomeViewEnd = CGPointMake(welcomeView.frame.origin.x + welcomeView.frame.width, welcomeView.frame.origin.y)
                 UIView.animateWithDuration(1.0, delay: 0.25, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
                         self.welcomeView.frame.origin = welcomeViewEnd
                     }, completion: { success in
                         self.welcomeView.hidden = true
                 })
-                UIView.animateWithDuration(1.25, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
-                        self.styleArrow.frame.origin = self.originalArrowPosition!
-                    }, completion: nil)
-            }
-            else { //is not first selection
-                //animate out still frame viewer
-                let newStillFramePosition = CGPointMake(originalPlayerPosition!.x + playerContainer.frame.width, originalStillViewerPosition!.y)
-                UIView.animateWithDuration(1.0, delay: 0.25, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
-                        self.stillFrameViewer.frame.origin = newStillFramePosition
-                    }, completion: nil)
-                //bounce arrow
-                let newArrowPosition = CGPointMake(originalArrowPosition!.x - 35, originalArrowPosition!.y)
-                UIView.animateWithDuration(0.3, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 10, options: nil, animations: {
-                        self.styleArrow.frame.origin = newArrowPosition
-                    }, completion: nil)
-                UIView.animateWithDuration(1.0, delay: 0.3, usingSpringWithDamping: 0.4, initialSpringVelocity: 0, options: nil, animations: {
-                        self.styleArrow.frame.origin = self.originalArrowPosition!
-                    }, completion: nil)
             }
         }
     }
@@ -325,6 +297,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             return //cannot go forward from Duration Editor yet
         }
         currentMode = .Duration
+        playerView.shouldShrink = true
         changeViewTitleTo("Trim Clip", duration: 0.5)
         prepareDurationEditor()
         
@@ -337,8 +310,9 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         let newPagePosition = CGPointMake(originalPagePosition!.x - view.frame.width, originalPagePosition!.y)
         pageContainerLeftConstraint.constant = -view.frame.width
         UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
-            self.pageContainer.frame.origin = newPagePosition
+                self.pageContainer.frame.origin = newPagePosition
             }, completion: nil)
+        playerView.preferAspect(1, duration: 1.0, dampening: 0.8)
     }
     
     
@@ -348,6 +322,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         }
         changeViewTitleTo("Squareify", duration: 0.5)
         currentMode = .Picker
+        playerView.shouldShrink = false
         
         backBarButton.enabled = false
         UIView.animateWithDuration(0.5, animations: {
@@ -358,7 +333,9 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         pageContainerLeftConstraint.constant = 0
         UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
             self.pageContainer.frame.origin = self.originalPagePosition!
+            self.view.layoutIfNeeded()
         }, completion: nil)
+        playerView.preferAspect(1.25, duration: 1.0, dampening: 0.8)
     }
 
     
@@ -403,7 +380,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         
         //generate new stills
         let width = timelineView.frame.width
-        let height = timelineView.frame.height * (3/4)
+        let height = timelineView.frame.height
         let assetTrack = currentAssetTrack()!
         let firstFrameImage = self.getImageFromCurrentSelectionAtTime(kCMTimeZero, exact: false)!
 
@@ -420,10 +397,10 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     func generateAndAddFrames(count: Int, width: CGFloat, height: CGFloat, durationPerFrame: Float64) {
         for frame in 0...(count - 1) {
-            let size = CGSizeMake(width, timelineView.frame.height)
+            let size = CGSizeMake(width, height)
             let origin = CGPointMake((width + 1) * CGFloat(frame), 0) //+  adds gutter
             let imageView = UIImageView(frame: CGRect(origin: origin, size: size))
-            imageView.contentMode = UIViewContentMode.ScaleAspectFill
+            imageView.contentMode = UIViewContentMode.ScaleAspectFit
             self.applyRoundedMask(view: imageView, cornerRadii: 0, corners: UIRectCorner.allZeros)
             let frameTime = CMTimeMakeWithSeconds(durationPerFrame * Float64(frame), 1000)
             dispatch_async(BACKGROUND_QUEUE, {
@@ -645,54 +622,24 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     * Ad Delegate - bring the banner on screen when it has an ad to display, move off when it doesn't
     */
     
-    var originalPickerHeight : CGFloat?
-    
     func bannerViewDidLoadAd(banner: ADBannerView!) {
-        
-        //keep the video picker from being taller than it has space to be
-        if originalPickerHeight == nil {
-            originalPickerHeight = pickerCollection.frame.height
-        }
-        if pickerCollection.frame.height > originalPickerHeight {
-            pickerCollection.frame.size = CGSize(width: pickerCollection.frame.width, height: originalPickerHeight!)
-        }
-        
-        if banner.hidden {
-            if banner.frame.origin.y < view.frame.height { //banner is currently on screen
-                banner.frame.origin = CGPointMake(0, view.frame.height)
-            }
-            
-            banner.hidden = false
-            let height = banner.frame.height
-            let newBannerPosition = CGPointMake(banner.frame.origin.x, banner.frame.origin.y - height)
-            let newPickerSize = CGSizeMake(pickerCollection.frame.width, pickerCollection.frame.height - height)
-            
+        if adPositionConstraint.constant == -50 { //ad is off-screen
+            adPositionConstraint.constant = 0
             UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
-                banner.frame.origin = newBannerPosition
-                self.pickerCollection.frame.size = newPickerSize
-            }, completion: { success in
-                self.pageConstraintBottomGuide.active = false
-                self.pageConstraintBottomAd.active = true
-            })
+                    self.view.layoutIfNeeded()
+            }, completion: nil)
+            playerView.modifyOffsetBy(50, duration: 1.0, dampening: 1)
         }
     }
     
     
     func bannerView(banner: ADBannerView!, didFailToReceiveAdWithError error: NSError!) {
-        if !banner.hidden {
-            let bannerOffScreen = CGPointMake(0, view.frame.height)
-            var newPickerSize = CGSizeMake(pickerCollection.frame.width, pickerCollection.frame.height + banner.frame.height)
-            if newPickerSize.height > originalPickerHeight {
-                newPickerSize.height = originalPickerHeight!
-            }
+        if adPositionConstraint.constant == 0 { //ad is on-screen
+            adPositionConstraint.constant = -50
             UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
-                banner.frame.origin = bannerOffScreen
-                self.pickerCollection.frame.size = newPickerSize
-            }, completion: { success in
-                banner.hidden = true
-                self.pageConstraintBottomGuide.active = true
-                self.pageConstraintBottomAd.active = false
-            })
+                    self.view.layoutIfNeeded()
+            }, completion: nil)
+            playerView.modifyOffsetBy(-50, duration: 1.0, dampening: 1)
         }
     }
     
