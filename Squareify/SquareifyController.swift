@@ -75,7 +75,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     override func viewWillAppear(animated: Bool) {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "loopPlayerVideo", name: AVPlayerItemDidPlayToEndTimeNotification, object: nil) //set up video looping
-        AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback, error: nil)
+        AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryAmbient, error: nil)
         
         let screenAspect = self.view.frame.width / self.view.frame.height
         if screenAspect > (9.5/16) { //is iPhone 4S
@@ -237,6 +237,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     @IBAction func toggleMute(sender: UIButton) {
         playerMuted = !playerMuted
+        AVAudioSession.sharedInstance().setCategory(playerMuted ? AVAudioSessionCategoryAmbient : AVAudioSessionCategoryPlayback, error: nil)
         sender.setImage(UIImage(named: (playerMuted ? "unmute-filled" : "mute")), forState: UIControlState.Normal)
         if let player = playerController?.player? {
             player.volume = playerMuted ? 0 : 1
@@ -402,7 +403,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         
         //generate new stills
         let width = timelineView.frame.width
-        let height = timelineView.frame.height
+        let height = timelineView.frame.height * (3/4)
         let assetTrack = currentAssetTrack()!
         let firstFrameImage = self.getImageFromCurrentSelectionAtTime(kCMTimeZero, exact: false)!
 
@@ -419,10 +420,11 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     func generateAndAddFrames(count: Int, width: CGFloat, height: CGFloat, durationPerFrame: Float64) {
         for frame in 0...(count - 1) {
-            let size = CGSizeMake(width, height)
+            let size = CGSizeMake(width, timelineView.frame.height)
             let origin = CGPointMake((width + 1) * CGFloat(frame), 0) //+  adds gutter
             let imageView = UIImageView(frame: CGRect(origin: origin, size: size))
-            imageView.contentMode = UIViewContentMode.ScaleAspectFit
+            imageView.contentMode = UIViewContentMode.ScaleAspectFill
+            self.applyRoundedMask(view: imageView, cornerRadii: 0, corners: UIRectCorner.allZeros)
             let frameTime = CMTimeMakeWithSeconds(durationPerFrame * Float64(frame), 1000)
             dispatch_async(BACKGROUND_QUEUE, {
                 //grab frame
