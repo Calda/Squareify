@@ -22,7 +22,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     @IBOutlet weak var playerContainer: UIView!
     @IBOutlet weak var stillFrameViewer: UIImageView!
-    @IBOutlet weak var welcomeView: UIView!
     @IBOutlet weak var nextBarButton: UIBarButtonItem!
     @IBOutlet weak var backBarButton: UIBarButtonItem!
     @IBOutlet weak var playerView: PlayerView!
@@ -55,13 +54,8 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     var playerMuted = true
     
     //will change for iPhone 4S support
-    @IBOutlet weak var playerViewAspectConstraint: NSLayoutConstraint!
-    @IBOutlet weak var welcomeText: UILabel!
     @IBOutlet weak var playerContainerAspectConstraint: NSLayoutConstraint!
     @IBOutlet weak var playerContainerMarginConstraint: NSLayoutConstraint!
-    
-    //original configuations for items that will animate
-    var originalPagePosition : CGPoint?
     
     //the current view of the app
     enum SquareifyMode {
@@ -77,13 +71,15 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         
         let screenAspect = self.view.frame.width / self.view.frame.height
         if screenAspect > (9.5/16) { //is iPhone 4S
-            welcomeText.font = UIFont(name: welcomeText!.font.fontName, size: 22)
             playerContainerAspectConstraint.constant = -20
             playerContainerMarginConstraint.constant = -40
-            playerView.REQUIRED_OFFEST = -75
+            playerView.REQUIRED_OFFEST = 95
             playerView.modifyOffsetBy(0, duration: 0, dampening: 1)
         }
-        playerView.preferHeight(0, duration: 0, dampening: 1)
+        if playerController == nil {
+            //only run this the first time the app is opened
+            playerView.preferHeight(0, duration: 0, dampening: 1)
+        }
         
         displayVideoThumbnails()
         //get photos auth
@@ -99,9 +95,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     
     override func viewDidAppear(animated: Bool) {
-        println(animated)
-        playerView.preferAspect(1.25, duration: 1.0, dampening: 0.8)
-        
         let edgePanRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: "edgePanTrigger:")
         edgePanRecognizer.edges = .Left
         edgePanRecognizer.delegate = self
@@ -110,7 +103,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         //change title view
         let titleView = UILabel(frame: CGRectMake(0, 0, 100, 200))
         titleView.textAlignment = NSTextAlignment.Center
-        titleView.text = "Squareify"
+        titleView.text = "Choose a video"
         titleView.textColor = UIColor.whiteColor()
         titleView.font = UIFont(name: "STHeitiSC-Medium", size: 21)
         navigationItem.titleView = titleView
@@ -166,10 +159,15 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             playerController!.player.pause()
             stillFrameViewer.image = self.getImageFromCurrentSelectionAtTime(playerController!.player.currentTime(), exact: true)
             stillFrameViewer.alpha = 1
+            println(self.playerController?.videoGravity)
         }
         
-        playerContainerPosition.constant = -playerContainer.frame.width
-        view.layoutIfNeeded()
+        if playerView.actualHeight == 0 {
+            playerView.preferAspect(1.25, duration: 1.0, dampening: 0.8)
+        } else {
+            playerContainerPosition.constant = -playerContainer.frame.width
+            view.layoutIfNeeded()
+        }
         
         //get asset for new video
         let index = selectionIndex.indexAtPosition(1)
@@ -186,15 +184,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
                     self.view.layoutIfNeeded()
             }, completion: nil)
             
-            if !welcomeView.hidden { //is first selection, animate out welcome view
-                playerContainer.hidden = false
-                let welcomeViewEnd = CGPointMake(welcomeView.frame.origin.x + welcomeView.frame.width, welcomeView.frame.origin.y)
-                UIView.animateWithDuration(1.0, delay: 0.25, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
-                        self.welcomeView.frame.origin = welcomeViewEnd
-                    }, completion: { success in
-                        self.welcomeView.hidden = true
-                })
-            }
         }
     }
 
@@ -307,10 +296,9 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         })
         backBarButton.enabled = true
         
-        let newPagePosition = CGPointMake(originalPagePosition!.x - view.frame.width, originalPagePosition!.y)
         pageContainerLeftConstraint.constant = -view.frame.width
         UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
-                self.pageContainer.frame.origin = newPagePosition
+                self.view.layoutIfNeeded()
             }, completion: nil)
         playerView.preferAspect(1, duration: 1.0, dampening: 0.8)
     }
@@ -320,7 +308,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         if currentMode == .Picker {
             return //cannot go back from picker
         }
-        changeViewTitleTo("Squareify", duration: 0.5)
+        changeViewTitleTo("Choose a video", duration: 0.5)
         currentMode = .Picker
         playerView.shouldShrink = false
         
@@ -332,7 +320,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         
         pageContainerLeftConstraint.constant = 0
         UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
-            self.pageContainer.frame.origin = self.originalPagePosition!
             self.view.layoutIfNeeded()
         }, completion: nil)
         playerView.preferAspect(1.25, duration: 1.0, dampening: 0.8)
