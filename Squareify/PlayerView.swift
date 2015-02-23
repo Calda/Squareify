@@ -7,10 +7,15 @@
 //
 
 import UIKit
+import AVKit
 
 class PlayerView: UIView {
 
     let heightConstraint : NSLayoutConstraint!
+    var playerController : AVPlayerViewController?
+    func givePlayerController(controller: AVPlayerViewController) {
+        playerController = controller
+    }
     
     private var preferedHeight : CGFloat = 0
     private var heightOffset : CGFloat = 0
@@ -25,9 +30,7 @@ class PlayerView: UIView {
             }
         }
     }
-    
     var REQUIRED_OFFEST : CGFloat = 0
-
     
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -36,7 +39,7 @@ class PlayerView: UIView {
             if let constraint = constraint as? NSLayoutConstraint {
                 if constraint.firstAttribute == NSLayoutAttribute.Height {
                     heightConstraint = constraint
-                    return
+                    break
                 }
             }
         }

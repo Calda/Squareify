@@ -42,11 +42,9 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     var timelineHandles: (left: TimelineHandle, right: TimelineHandle)?
     @IBOutlet weak var durationDisplay: UILabel!
     @IBOutlet weak var instagramIcon: UIImageView!
-    @IBOutlet weak var instagramAllowText: UILabel!
-    @IBOutlet weak var instagramCanPost: UILabel!
+    @IBOutlet weak var instagramTextPosition: NSLayoutConstraint!
     @IBOutlet weak var vineIcon: UIImageView!
-    @IBOutlet weak var vineAllowText: UILabel!
-    @IBOutlet weak var vineCanPost: UILabel!
+    @IBOutlet weak var vineTextPosition: NSLayoutConstraint!
     
     var fetch : PHFetchResult?
     let imageManager = PHImageManager()
@@ -76,13 +74,40 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             playerView.REQUIRED_OFFEST = 95
             playerView.modifyOffsetBy(0, duration: 0, dampening: 1)
         }
-        if playerController == nil {
-            //only run this the first time the app is opened
-            playerView.preferHeight(0, duration: 0, dampening: 1)
-        }
         
         displayVideoThumbnails()
         //get photos auth
+        
+        
+        if playerController?.player == nil {
+            //only run this the first time the app is opened
+            playerView.preferHeight(0, duration: 0, dampening: 1)
+            
+            //change title view
+            let titleView = UILabel(frame: CGRectMake(0, 0, 100, 200))
+            titleView.textAlignment = NSTextAlignment.Center
+            titleView.text = "Choose a video"
+            titleView.textColor = UIColor.whiteColor()
+            titleView.font = UIFont(name: "STHeitiSC-Medium", size: 21)
+            navigationItem.titleView = titleView
+            
+            let edgePanRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: "edgePanTrigger:")
+            edgePanRecognizer.edges = .Left
+            edgePanRecognizer.delegate = self
+            self.view.addGestureRecognizer(edgePanRecognizer)
+        }
+        
+    }
+    
+    
+    override func viewDidAppear(animated: Bool) {
+        if playerController?.player == nil {
+            //only run this the first time the app is opened
+            playerView.preferHeight(0, duration: 0, dampening: 1)
+            
+            
+        }
+        
         let authorization = PHPhotoLibrary.authorizationStatus()
         if authorization == PHAuthorizationStatus.NotDetermined {
             PHPhotoLibrary.requestAuthorization() { status in
@@ -91,22 +116,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
                 }
             }
         }
-    }
-    
-    
-    override func viewDidAppear(animated: Bool) {
-        let edgePanRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: "edgePanTrigger:")
-        edgePanRecognizer.edges = .Left
-        edgePanRecognizer.delegate = self
-        self.view.addGestureRecognizer(edgePanRecognizer)
-        
-        //change title view
-        let titleView = UILabel(frame: CGRectMake(0, 0, 100, 200))
-        titleView.textAlignment = NSTextAlignment.Center
-        titleView.text = "Choose a video"
-        titleView.textColor = UIColor.whiteColor()
-        titleView.font = UIFont(name: "STHeitiSC-Medium", size: 21)
-        navigationItem.titleView = titleView
     }
     
     
@@ -159,7 +168,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             playerController!.player.pause()
             stillFrameViewer.image = self.getImageFromCurrentSelectionAtTime(playerController!.player.currentTime(), exact: true)
             stillFrameViewer.alpha = 1
-            println(self.playerController?.videoGravity)
         }
         
         if playerView.actualHeight == 0 {
@@ -192,6 +200,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         //setup embeded viewer
         if segue.identifier? == "embedViewer" {
             playerController = (segue.destinationViewController as AVPlayerViewController)
+            playerView.givePlayerController(playerController!)
         }
     }
     
@@ -247,7 +256,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     }
     
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
-        let gutterSize = 2
+        let gutterSize = 1
         let screenWidth = view.frame.width
         let countPerRow = (screenWidth > 350 ? 4 : 3) //show 3 videos per row on 5s and 4s
         let avaliableWidth = screenWidth - CGFloat((countPerRow - 1) * gutterSize)
@@ -264,7 +273,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     }
     
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAtIndex section: Int) -> CGFloat {
-        return 2
+        return 1
     }
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
@@ -566,40 +575,36 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         self.durationDisplay.text = self.timeToDecoratedString(duration)
         let durationSeconds = CMTimeGetSeconds(duration)
         
-        func durationAllowed(image: UIImageView, timeText: UILabel, canPostText: UILabel) {
+        func durationAllowed(image: UIImageView, constraint: NSLayoutConstraint) {
             if image.alpha != 1 { //image needs animation change
                 image.alpha = 1
-                let newTimeTextPosition = CGPointMake(timeText.frame.origin.x, timeText.frame.origin.y - 30)
-                let newCanPostTextPosition = CGPointMake(canPostText.frame.origin.x, canPostText.frame.origin.y - 30)
+                constraint.constant -= 40
                 UIView.animateWithDuration(0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: nil, animations: {
-                    timeText.frame.origin = newTimeTextPosition
-                    canPostText.frame.origin = newCanPostTextPosition
+                    self.view.layoutIfNeeded()
                 }, completion: nil)
             }
         }
         
-        func durationNotAllowed(image: UIImageView, timeText: UILabel, canPostText: UILabel) {
+        func durationNotAllowed(image: UIImageView, constraint: NSLayoutConstraint) {
             if image.alpha == 1 { //image needs animation change
                 image.alpha = 0.35
-                let newTimeTextPosition = CGPointMake(timeText.frame.origin.x, timeText.frame.origin.y + 30)
-                let newCanPostTextPosition = CGPointMake(canPostText.frame.origin.x, canPostText.frame.origin.y + 30)
+                constraint.constant += 40
                 UIView.animateWithDuration(0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: nil, animations: {
-                    timeText.frame.origin = newTimeTextPosition
-                    canPostText.frame.origin = newCanPostTextPosition
+                    self.view.layoutIfNeeded()
                 }, completion: nil)
             }
         }
         
         if durationSeconds > 15.0 {
-            durationNotAllowed(instagramIcon, instagramAllowText, instagramCanPost)
+            durationNotAllowed(instagramIcon, instagramTextPosition)
         } else {
-            durationAllowed(instagramIcon, instagramAllowText, instagramCanPost)
+            durationAllowed(instagramIcon, instagramTextPosition)
         }
         
         if durationSeconds > 6.0 {
-            durationNotAllowed(vineIcon, vineAllowText, vineCanPost)
+            durationNotAllowed(vineIcon, vineTextPosition)
         } else {
-            durationAllowed(vineIcon, vineAllowText, vineCanPost)
+            durationAllowed(vineIcon, vineTextPosition)
         }
         
     }
