@@ -171,7 +171,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         }
         
         if playerView.actualHeight == 0 {
-            playerView.preferAspect(1.25, duration: 1.0, dampening: 0.8)
+            playerView.preferAspect(1, duration: 1.0, dampening: 0.75)
         } else {
             playerContainerPosition.constant = -playerContainer.frame.width
             view.layoutIfNeeded()
@@ -286,6 +286,34 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         }
     }
     
+    
+    var playerAttachedToGesture = false
+    @IBAction func pickedPanned(sender: UIPanGestureRecognizer) {
+        let touchY = sender.locationInView(playerView).y
+        if touchY < playerView.frame.height || playerAttachedToGesture {
+            playerView.preferHeight(touchY, duration: 0, dampening: 1)
+            pickerCollection.scrollEnabled = false
+            playerAttachedToGesture = true
+            playerController?.player?.pause()
+        }
+        if sender.state == .Ended && playerAttachedToGesture{
+            pickerCollection.scrollEnabled = true
+            playerAttachedToGesture = false
+            //animate player moving to new resting state
+            let velocity = sender.velocityInView(playerView).y
+            //curve duration based on final velocity
+            let duration = 1 - (0.7 - pow(1.5, -abs(velocity)/200))
+            if velocity < 0 { //was being moved up
+                playerView.preferHeight(0, duration: Double(duration), dampening: 1)
+            } else {
+                playerView.preferAspect(1, duration:  Double(duration), dampening: 0.8)
+                playerController?.player?.play()
+            }
+        }
+    }
+    
+    
+    
     /**
     * Transition to and from Duration editor
     */
@@ -309,7 +337,12 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
                 self.view.layoutIfNeeded()
             }, completion: nil)
-        playerView.preferAspect(1, duration: 1.0, dampening: 0.8)
+        
+        //find playerView height preference
+        let contentHeight = timelineView.frame.origin.y + timelineView.frame.height + 20
+        let navbar = self.navigationController!.navigationBar.frame.height + 20 //+20 accounts for time bar
+        playerView.preferContentHeight(contentHeight, navbar: navbar, duration: 1.0, dampening: 0.8)
+        playerController?.player?.play()
     }
     
     
@@ -328,10 +361,12 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         nextBarButton.enabled = true
         
         pageContainerLeftConstraint.constant = 0
-        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
+        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
             self.view.layoutIfNeeded()
         }, completion: nil)
-        playerView.preferAspect(1.25, duration: 1.0, dampening: 0.8)
+        
+        playerView.preferHeight(0, duration: 1.0, dampening: 1)
+        playerController?.player?.pause()
     }
 
     

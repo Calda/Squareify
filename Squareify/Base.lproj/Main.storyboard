@@ -406,6 +406,7 @@
                                         <rect key="frame" x="0.0" y="0.0" width="320" height="248"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <color key="tintColor" red="0.0" green="0.69411764710000001" blue="0.69803921570000005" alpha="1" colorSpace="calibratedRGB"/>
+                                        <gestureRecognizers/>
                                         <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="YkG-Pi-sfm">
                                             <size key="itemSize" width="106" height="106"/>
                                             <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -461,6 +462,7 @@
                                         <connections>
                                             <outlet property="dataSource" destination="blJ-Ad-SC4" id="biS-zO-X7N"/>
                                             <outlet property="delegate" destination="blJ-Ad-SC4" id="q2M-LJ-kjV"/>
+                                            <outletCollection property="gestureRecognizers" destination="i6l-vl-w1X" appends="YES" id="ZFJ-XM-xp5"/>
                                         </connections>
                                     </collectionView>
                                 </subviews>
@@ -591,9 +593,15 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="RVW-Ny-1Bm" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <panGestureRecognizer minimumNumberOfTouches="1" id="KhW-F7-DWJ">
+                <panGestureRecognizer minimumNumberOfTouches="1" id="KhW-F7-DWJ" userLabel="Timeline Handle Pan">
                     <connections>
                         <action selector="durationEditorPanRecognized:" destination="blJ-Ad-SC4" id="XJM-dm-Toj"/>
+                    </connections>
+                </panGestureRecognizer>
+                <panGestureRecognizer minimumNumberOfTouches="1" id="i6l-vl-w1X" userLabel="Picker Pan">
+                    <connections>
+                        <action selector="pickedPanned:" destination="blJ-Ad-SC4" id="tpG-Uc-M1w"/>
+                        <outlet property="delegate" destination="blJ-Ad-SC4" id="MTT-Gn-klb"/>
                     </connections>
                 </panGestureRecognizer>
             </objects>
