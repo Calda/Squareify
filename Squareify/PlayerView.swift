@@ -19,7 +19,7 @@ class PlayerView: UIView {
     
     private var preferedHeight : CGFloat = 0
     private var heightOffset : CGFloat = 0
-    var shouldShrink = false
+    var shouldShrink = true
     var REQUIRED_OFFEST : CGFloat = 0
     private var ignoreRequired = false
     var actualHeight: CGFloat {
@@ -70,9 +70,9 @@ class PlayerView: UIView {
     func updateSize(duration: NSTimeInterval, _ dampening: CGFloat) {
         heightConstraint.constant = actualHeight
         if duration > 0 {
-            UIView.animateWithDuration(duration, delay: 0.0, usingSpringWithDamping: dampening, initialSpringVelocity: 0, options: nil, animations: {
+            UIView.animateWithDuration(duration/2, animations: {
                 self.superview!.layoutIfNeeded()
-            }, completion: nil)
+            })
         } else {
             self.superview?.layoutIfNeeded()
         }

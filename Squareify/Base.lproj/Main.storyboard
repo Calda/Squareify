@@ -25,7 +25,7 @@
                                         <rect key="frame" x="288" y="-35" width="255" height="326"/>
                                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                     </imageView>
-                                    <containerView opaque="NO" contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="q4t-xT-zIb" userLabel="Player Container">
+                                    <containerView opaque="NO" tag="1" contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="q4t-xT-zIb" userLabel="Player Container">
                                         <rect key="frame" x="33" y="-35" width="255" height="326"/>
                                         <constraints>
                                             <constraint firstAttribute="width" secondItem="q4t-xT-zIb" secondAttribute="height" multiplier="12.5:16" id="Qrm-K8-y7A"/>

@@ -171,7 +171,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         }
         
         if playerView.actualHeight == 0 {
-            playerView.preferAspect(1, duration: 1.0, dampening: 0.75)
+           playerView.preferContentHeight(getPreferedContentHeight(), navbar: navBarHeight(), duration:1.0, dampening: 0.75)
         } else {
             playerContainerPosition.constant = -playerContainer.frame.width
             view.layoutIfNeeded()
@@ -306,7 +306,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             if velocity < 0 { //was being moved up
                 playerView.preferHeight(0, duration: Double(duration), dampening: 1)
             } else {
-                playerView.preferAspect(1, duration:  Double(duration), dampening: 0.8)
+                playerView.preferContentHeight(getPreferedContentHeight(), navbar: navBarHeight(), duration: Double(duration), dampening: 1)
                 playerController?.player?.play()
             }
         }
@@ -323,7 +323,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             return //cannot go forward from Duration Editor yet
         }
         currentMode = .Duration
-        playerView.shouldShrink = true
         changeViewTitleTo("Trim Clip", duration: 0.5)
         prepareDurationEditor()
         
@@ -338,10 +337,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
                 self.view.layoutIfNeeded()
             }, completion: nil)
         
-        //find playerView height preference
-        let contentHeight = timelineView.frame.origin.y + timelineView.frame.height + 20
-        let navbar = self.navigationController!.navigationBar.frame.height + 20 //+20 accounts for time bar
-        playerView.preferContentHeight(contentHeight, navbar: navbar, duration: 1.0, dampening: 0.8)
+        playerView.preferContentHeight(getPreferedContentHeight(), navbar: navBarHeight(), duration: 1.0, dampening: 0.8)
         playerController?.player?.play()
     }
     
@@ -352,7 +348,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         }
         changeViewTitleTo("Choose a video", duration: 0.5)
         currentMode = .Picker
-        playerView.shouldShrink = false
         
         backBarButton.enabled = false
         UIView.animateWithDuration(0.5, animations: {
@@ -385,8 +380,25 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         }
     }
     
+    
     func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
+    }
+    
+    
+    func getPreferedContentHeight() -> CGFloat {
+        if currentMode == .Duration {
+            return timelineView.frame.origin.y + timelineView.frame.height + 20
+        }
+        else if currentMode == .Picker {
+            return view.frame.width * 0.6
+        }
+        return 250
+    }
+    
+    func navBarHeight() -> CGFloat {
+        return navigationController!.navigationBar.frame.height + 20
+        //+20 accounts for time bar
     }
     
     
