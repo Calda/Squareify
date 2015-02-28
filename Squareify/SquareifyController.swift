@@ -160,7 +160,10 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         }
         
         let currentCell = pickerCollection.cellForItemAtIndexPath(selectionIndex) as PickerCell?
-        currentCell?.selectCell()
+        if currentCell == nil {
+            return
+        }
+        currentCell!.selectCell()
         currentSelected = selectionIndex
         
         //get current frame of current video
@@ -171,11 +174,22 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         }
         
         if playerView.actualHeight == 0 {
-           playerView.preferContentHeight(getPreferedContentHeight(), navbar: navBarHeight(), duration:1.0, dampening: 0.75)
+            //expand player view
+            let contentHeight = getPreferedContentHeight()
+            playerView.preferContentHeight(getPreferedContentHeight(), navbar: navBarHeight(), duration: 0.45, dampening: 0.75)
         } else {
             playerContainerPosition.constant = -playerContainer.frame.width
             view.layoutIfNeeded()
         }
+        
+        //move selection to center of new frame
+        let cellHeight = currentCell!.frame.height
+        let scrollTo = currentCell!.frame.origin.y - cellHeight/2
+        let scrollToClamped = min(max(0, scrollTo), pickerCollection.contentSize.height - pickerCollection.frame.height)
+        let offset = CGPointMake(0, scrollToClamped)
+        UIView.animateWithDuration(0.45, animations: {
+            self.pickerCollection.contentOffset = offset
+        })
         
         //get asset for new video
         let index = selectionIndex.indexAtPosition(1)
@@ -187,6 +201,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
                 self.playerController?.player.volume = (self.playerMuted ? 0 : 1)
             })
             //animate in player
+
             playerContainerPosition.constant = 0
             UIView.animateWithDuration(1.0, delay: 0.25, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
                     self.view.layoutIfNeeded()
@@ -323,21 +338,21 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             return //cannot go forward from Duration Editor yet
         }
         currentMode = .Duration
-        changeViewTitleTo("Trim Clip", duration: 0.5)
+        changeViewTitleTo("Trim Clip", duration: 0.45)
         prepareDurationEditor()
         
         nextBarButton.enabled = false
-        UIView.animateWithDuration(0.5, animations: {
+        UIView.animateWithDuration(0.45, animations: {
             self.backBarButton.tintColor = self.nextBarButton.tintColor
         })
         backBarButton.enabled = true
         
         pageContainerLeftConstraint.constant = -view.frame.width
-        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: nil, animations: {
+        UIView.animateWithDuration(0.45, animations: {
                 self.view.layoutIfNeeded()
-            }, completion: nil)
+            })
         
-        playerView.preferContentHeight(getPreferedContentHeight(), navbar: navBarHeight(), duration: 1.0, dampening: 0.8)
+        playerView.preferContentHeight(getPreferedContentHeight(), navbar: navBarHeight(), duration: 0.45, dampening: 0.8)
         playerController?.player?.play()
     }
     
@@ -346,21 +361,21 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         if currentMode == .Picker {
             return //cannot go back from picker
         }
-        changeViewTitleTo("Choose a video", duration: 0.5)
+        changeViewTitleTo("Choose a video", duration: 0.45)
         currentMode = .Picker
         
         backBarButton.enabled = false
-        UIView.animateWithDuration(0.5, animations: {
+        UIView.animateWithDuration(0.45, animations: {
             self.backBarButton.tintColor = UIColor.clearColor()
         })
         nextBarButton.enabled = true
         
         pageContainerLeftConstraint.constant = 0
-        UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
+        UIView.animateWithDuration(0.45, animations: {
             self.view.layoutIfNeeded()
-        }, completion: nil)
+        })
         
-        playerView.preferHeight(0, duration: 1.0, dampening: 1)
+        playerView.preferHeight(0, duration: 0.45, dampening: 1)
         playerController?.player?.pause()
     }
 
@@ -384,17 +399,17 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
     }
-    
+
     
     func getPreferedContentHeight() -> CGFloat {
         if currentMode == .Duration {
             return timelineView.frame.origin.y + timelineView.frame.height + 20
         }
-        else if currentMode == .Picker {
-            return view.frame.width * 0.6
-        }
-        return 250
+        //else if currentMode == .Picker {
+        return view.frame.width * 0.6
+        //}
     }
+    
     
     func navBarHeight() -> CGFloat {
         return navigationController!.navigationBar.frame.height + 20
@@ -634,7 +649,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         
         func durationNotAllowed(image: UIImageView, constraint: NSLayoutConstraint) {
             if image.alpha == 1 { //image needs animation change
-                image.alpha = 0.35
+                image.alpha = 0.45
                 constraint.constant += 40
                 UIView.animateWithDuration(0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: nil, animations: {
                     self.view.layoutIfNeeded()
@@ -664,10 +679,10 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     func bannerViewDidLoadAd(banner: ADBannerView!) {
         if adPositionConstraint.constant == -50 { //ad is off-screen
             adPositionConstraint.constant = 0
-            UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
+            UIView.animateWithDuration(0.5, animations: {
                     self.view.layoutIfNeeded()
-            }, completion: nil)
-            playerView.modifyOffsetBy(50, duration: 1.0, dampening: 1)
+            })
+            playerView.modifyOffsetBy(50, duration: 0.5, dampening: 1)
         }
     }
     
@@ -675,10 +690,10 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     func bannerView(banner: ADBannerView!, didFailToReceiveAdWithError error: NSError!) {
         if adPositionConstraint.constant == 0 { //ad is on-screen
             adPositionConstraint.constant = -50
-            UIView.animateWithDuration(1.0, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: nil, animations: {
+            UIView.animateWithDuration(0.5, animations: {
                     self.view.layoutIfNeeded()
-            }, completion: nil)
-            playerView.modifyOffsetBy(-50, duration: 1.0, dampening: 1)
+            })
+            playerView.modifyOffsetBy(-50, duration: 0.5, dampening: 1)
         }
     }
     

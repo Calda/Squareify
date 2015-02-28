@@ -70,7 +70,7 @@ class PlayerView: UIView {
     func updateSize(duration: NSTimeInterval, _ dampening: CGFloat) {
         heightConstraint.constant = actualHeight
         if duration > 0 {
-            UIView.animateWithDuration(duration/2, animations: {
+            UIView.animateWithDuration(duration, animations: {
                 self.superview!.layoutIfNeeded()
             })
         } else {
