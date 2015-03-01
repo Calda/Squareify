@@ -22,11 +22,11 @@
                                 <rect key="frame" x="0.0" y="64" width="320" height="256"/>
                                 <subviews>
                                     <imageView userInteractionEnabled="NO" alpha="0.0" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Xhc-Um-8eo" userLabel="Still Frame Viewer">
-                                        <rect key="frame" x="288" y="-35" width="255" height="326"/>
+                                        <rect key="frame" x="303" y="-54" width="285" height="364"/>
                                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                     </imageView>
-                                    <containerView opaque="NO" tag="1" contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="q4t-xT-zIb" userLabel="Player Container">
-                                        <rect key="frame" x="33" y="-35" width="255" height="326"/>
+                                    <containerView opaque="NO" userInteractionEnabled="NO" tag="1" contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="q4t-xT-zIb" userLabel="Player Container">
+                                        <rect key="frame" x="18" y="-54" width="285" height="364"/>
                                         <constraints>
                                             <constraint firstAttribute="width" secondItem="q4t-xT-zIb" secondAttribute="height" multiplier="12.5:16" id="Qrm-K8-y7A"/>
                                         </constraints>
@@ -36,9 +36,13 @@
                                     </containerView>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="style mask no arrow.png" translatesAutoresizingMaskIntoConstraints="NO" id="YlC-iZ-Ud7" userLabel="style mask">
                                         <rect key="frame" x="33" y="0.0" width="255" height="256"/>
+                                        <gestureRecognizers/>
                                         <constraints>
                                             <constraint firstAttribute="width" secondItem="YlC-iZ-Ud7" secondAttribute="height" multiplier="255:256" id="N5D-Rx-D8Y"/>
                                         </constraints>
+                                        <connections>
+                                            <outletCollection property="gestureRecognizers" destination="2Wq-e1-3sg" appends="YES" id="bh0-nP-sYq"/>
+                                        </connections>
                                     </imageView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TUS-x1-No3" userLabel="Letterbox Left">
                                         <rect key="frame" x="0.0" y="0.0" width="33" height="256"/>
@@ -48,14 +52,27 @@
                                         <rect key="frame" x="288" y="0.0" width="32" height="256"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                     </view>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4jb-HG-YIS" userLabel="unmute hidden button">
+                                        <rect key="frame" x="270" y="215" width="50" height="50"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="50" id="a7j-F8-c8r"/>
+                                            <constraint firstAttribute="width" constant="50" id="cvy-vt-TIe"/>
+                                        </constraints>
+                                        <state key="normal">
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="toggleMute:" destination="blJ-Ad-SC4" eventType="touchUpInside" id="jGo-sC-0XP"/>
+                                        </connections>
+                                    </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ZQk-ui-pGM" userLabel="unmute">
-                                        <rect key="frame" x="285" y="221" width="25" height="25"/>
+                                        <rect key="frame" x="290" y="226" width="25" height="25"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="25" id="ir7-rm-njQ"/>
                                             <constraint firstAttribute="width" constant="25" id="kBC-Cl-B1W"/>
                                         </constraints>
                                         <color key="tintColor" red="0.32156862749999998" green="0.80000000000000004" blue="0.79607843140000001" alpha="1" colorSpace="calibratedRGB"/>
-                                        <state key="normal" title="Button" image="unmute-filled">
+                                        <state key="normal" title="Button" image="mute">
                                             <color key="titleColor" cocoaTouchSystemColor="darkTextColor"/>
                                         </state>
                                         <state key="selected" image="mute-filled"/>
@@ -77,11 +94,12 @@
                                     <constraint firstItem="q4t-xT-zIb" firstAttribute="centerY" secondItem="Xhc-Um-8eo" secondAttribute="centerY" id="BT6-kE-eD0"/>
                                     <constraint firstItem="q4t-xT-zIb" firstAttribute="centerX" secondItem="6fM-0Q-KWN" secondAttribute="centerX" id="Coh-yt-7gd"/>
                                     <constraint firstAttribute="centerX" secondItem="YlC-iZ-Ud7" secondAttribute="centerX" id="J7I-GC-CpR"/>
-                                    <constraint firstAttribute="bottom" secondItem="q4t-xT-zIb" secondAttribute="bottom" constant="-35" id="LAP-YM-M6J"/>
-                                    <constraint firstAttribute="bottom" secondItem="ZQk-ui-pGM" secondAttribute="bottom" constant="10" id="QNf-Oj-Kkx"/>
+                                    <constraint firstAttribute="bottom" secondItem="q4t-xT-zIb" secondAttribute="bottom" constant="-54" id="LAP-YM-M6J"/>
+                                    <constraint firstAttribute="bottom" secondItem="ZQk-ui-pGM" secondAttribute="bottom" constant="5" id="QNf-Oj-Kkx"/>
+                                    <constraint firstAttribute="bottom" secondItem="4jb-HG-YIS" secondAttribute="bottom" constant="-9" id="RqI-yl-8BR"/>
                                     <constraint firstAttribute="trailing" secondItem="q4t-xT-zIb" secondAttribute="trailing" id="TmL-Em-nJI"/>
-                                    <constraint firstAttribute="trailing" secondItem="ZQk-ui-pGM" secondAttribute="trailing" constant="10" id="UkM-1Q-CkN"/>
-                                    <constraint firstItem="q4t-xT-zIb" firstAttribute="top" secondItem="6fM-0Q-KWN" secondAttribute="top" constant="-35" id="V1q-aS-srT"/>
+                                    <constraint firstAttribute="trailing" secondItem="ZQk-ui-pGM" secondAttribute="trailing" constant="5" id="UkM-1Q-CkN"/>
+                                    <constraint firstItem="q4t-xT-zIb" firstAttribute="top" secondItem="6fM-0Q-KWN" secondAttribute="top" constant="-54" id="V1q-aS-srT"/>
                                     <constraint firstItem="vbw-kh-zhQ" firstAttribute="leading" secondItem="q4t-xT-zIb" secondAttribute="trailing" id="VLO-VP-0mh"/>
                                     <constraint firstAttribute="centerY" secondItem="YlC-iZ-Ud7" secondAttribute="centerY" id="XaD-ur-kjy"/>
                                     <constraint firstItem="vbw-kh-zhQ" firstAttribute="leading" secondItem="q4t-xT-zIb" secondAttribute="trailing" id="aXq-wy-fGT"/>
@@ -93,6 +111,7 @@
                                     <constraint firstItem="TUS-x1-No3" firstAttribute="leading" secondItem="6fM-0Q-KWN" secondAttribute="leading" id="rCu-hv-KpX"/>
                                     <constraint firstItem="q4t-xT-zIb" firstAttribute="leading" secondItem="6fM-0Q-KWN" secondAttribute="leading" id="rHT-Xz-Y7V"/>
                                     <constraint firstAttribute="width" secondItem="6fM-0Q-KWN" secondAttribute="height" multiplier="1.25:1" id="wCf-by-9qj"/>
+                                    <constraint firstAttribute="trailing" secondItem="4jb-HG-YIS" secondAttribute="trailing" id="x7q-y9-Ug6"/>
                                     <constraint firstItem="YlC-iZ-Ud7" firstAttribute="leading" secondItem="TUS-x1-No3" secondAttribute="trailing" id="xTo-EM-7Ag"/>
                                     <constraint firstAttribute="bottom" secondItem="YlC-iZ-Ud7" secondAttribute="bottom" id="xaj-O4-55Z"/>
                                 </constraints>
@@ -574,6 +593,9 @@
                         <outlet property="durationEditor" destination="jMm-3V-9o0" id="Htd-cm-m6q"/>
                         <outlet property="instagramIcon" destination="FXC-FI-sUp" id="1Mb-bC-CNB"/>
                         <outlet property="instagramTextPosition" destination="5ud-OK-Cbo" id="jcU-cJ-F2A"/>
+                        <outlet property="letterboxLeft" destination="TUS-x1-No3" id="zA4-ah-T0f"/>
+                        <outlet property="letterboxRight" destination="vbw-kh-zhQ" id="3ng-h4-wm1"/>
+                        <outlet property="muteButton" destination="ZQk-ui-pGM" id="s5Q-bU-JB4"/>
                         <outlet property="navigationItem" destination="8QT-2d-43y" id="5qM-oe-OeL"/>
                         <outlet property="nextBarButton" destination="a3h-kk-GOO" id="lAU-X1-G3q"/>
                         <outlet property="noVideosMessage" destination="jxh-fI-rm0" id="KnB-Ci-N9N"/>
@@ -585,6 +607,7 @@
                         <outlet property="playerContainerAspectConstraint" destination="Qrm-K8-y7A" id="xcV-SM-rVp"/>
                         <outlet property="playerContainerMarginConstraint" destination="LAP-YM-M6J" id="PcT-Zh-GSd"/>
                         <outlet property="playerContainerPosition" destination="Coh-yt-7gd" id="LdV-JK-BKZ"/>
+                        <outlet property="playerStyleMask" destination="YlC-iZ-Ud7" id="8d9-SP-A1T"/>
                         <outlet property="playerView" destination="6fM-0Q-KWN" id="pfx-p7-FZk"/>
                         <outlet property="stillFrameViewer" destination="Xhc-Um-8eo" id="QbH-ja-RMc"/>
                         <outlet property="timelineView" destination="oB6-Bo-X13" id="6gd-Ic-e2H"/>
@@ -604,6 +627,11 @@
                         <outlet property="delegate" destination="blJ-Ad-SC4" id="MTT-Gn-klb"/>
                     </connections>
                 </panGestureRecognizer>
+                <pinchGestureRecognizer id="2Wq-e1-3sg">
+                    <connections>
+                        <action selector="editorPinch:" destination="blJ-Ad-SC4" id="j0l-BX-eB4"/>
+                    </connections>
+                </pinchGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="-8" y="-698"/>
         </scene>
@@ -705,13 +733,30 @@
             </objects>
             <point key="canvasLocation" x="-444" y="-675"/>
         </scene>
+        <!--View Controller-->
+        <scene sceneID="aqQ-JP-3ED">
+            <objects>
+                <viewController id="bIU-4g-9Nu" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="3yv-eL-hkS"/>
+                        <viewControllerLayoutGuide type="bottom" id="vki-dm-KPO"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="0Uw-yl-yDq">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="xQ0-tZ-gRO" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+        </scene>
     </scenes>
     <resources>
         <image name="instagram icon 320.png" width="320" height="320"/>
+        <image name="mute" width="30" height="30"/>
         <image name="mute-filled" width="30" height="30"/>
         <image name="style mask no arrow.png" width="936" height="936"/>
         <image name="unmute" width="30" height="30"/>
-        <image name="unmute-filled" width="30" height="30"/>
         <image name="vine icon 340.png" width="300" height="300"/>
     </resources>
 </document>

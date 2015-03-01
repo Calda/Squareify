@@ -25,8 +25,12 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBOutlet weak var nextBarButton: UIBarButtonItem!
     @IBOutlet weak var backBarButton: UIBarButtonItem!
     @IBOutlet weak var playerView: PlayerView!
+    @IBOutlet weak var playerStyleMask: UIImageView!
     @IBOutlet weak var adBanner: ADBannerView!
     @IBOutlet weak var adPositionConstraint: NSLayoutConstraint!
+    @IBOutlet weak var muteButton: UIButton!
+    @IBOutlet weak var letterboxLeft: UIView!
+    @IBOutlet weak var letterboxRight: UIView!
     
     @IBOutlet weak var pageContainer: UIView!
     @IBOutlet weak var pageContainerLeftConstraint: NSLayoutConstraint!
@@ -57,7 +61,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     //the current view of the app
     enum SquareifyMode {
-        case Picker, Duration
+        case Picker, Duration, Editor
     }
     
     var currentMode : SquareifyMode = .Picker
@@ -216,6 +220,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         if segue.identifier? == "embedViewer" {
             playerController = (segue.destinationViewController as AVPlayerViewController)
             playerView.givePlayerController(playerController!)
+            playerController!.showsPlaybackControls = false
         }
     }
     
@@ -223,7 +228,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBAction func toggleMute(sender: UIButton) {
         playerMuted = !playerMuted
         AVAudioSession.sharedInstance().setCategory(playerMuted ? AVAudioSessionCategoryAmbient : AVAudioSessionCategoryPlayback, error: nil)
-        sender.setImage(UIImage(named: (playerMuted ? "unmute-filled" : "mute")), forState: UIControlState.Normal)
+        muteButton.setImage(UIImage(named: (playerMuted ? "mute" : "unmute-filled")), forState: UIControlState.Normal)
         if let player = playerController?.player? {
             player.volume = playerMuted ? 0 : 1
         }
@@ -334,26 +339,61 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     */
     
     @IBAction func nextButtonPressed(sender: AnyObject) {
-        if currentMode == .Duration {
-            return //cannot go forward from Duration Editor yet
-        }
-        currentMode = .Duration
-        changeViewTitleTo("Trim Clip", duration: 0.45)
-        prepareDurationEditor()
         
-        nextBarButton.enabled = false
-        UIView.animateWithDuration(0.45, animations: {
-            self.backBarButton.tintColor = self.nextBarButton.tintColor
-        })
-        backBarButton.enabled = true
-        
-        pageContainerLeftConstraint.constant = -view.frame.width
-        UIView.animateWithDuration(0.45, animations: {
-                self.view.layoutIfNeeded()
+        if currentMode == .Picker {
+            currentMode = .Duration
+            changeViewTitleTo("Trim Clip", duration: 0.45)
+            UIView.animateWithDuration(0.45, animations: {
+                self.backBarButton.tintColor = self.nextBarButton.tintColor
             })
+            prepareDurationEditor()
+            backBarButton.enabled = true
+            playerView.preferContentHeight(getPreferedContentHeight(), navbar: navBarHeight(), duration: 0.45, dampening: 0.8)
+            playerController?.player?.play()
+        }
         
-        playerView.preferContentHeight(getPreferedContentHeight(), navbar: navBarHeight(), duration: 0.45, dampening: 0.8)
-        playerController?.player?.play()
+        else if currentMode == .Duration {
+            currentMode = .Editor
+            changeViewTitleTo("Edit Video", duration: 0.45)
+            nextBarButton.enabled = false
+            playerView.shouldShrink = false
+            playerView.preferAspect(1, duration: 0.45, dampening: 1)
+            
+            for constraint in playerStyleMask.superview!.constraints() {
+                if let constraint = constraint as? NSLayoutConstraint {
+                    if (constraint.firstItem as? UIView == playerStyleMask || constraint.secondItem as? UIView == playerStyleMask) && (constraint.firstAttribute == .Top || constraint.firstAttribute == .Bottom || constraint.firstAttribute == .Leading || constraint.firstAttribute == .Trailing) {
+                        constraint.constant -= 50
+                    }
+                }
+            }
+            UIView.animateWithDuration(0.45, animations: {
+                    self.view.layoutIfNeeded()
+                }, completion: { success in
+                    self.letterboxLeft.alpha = 0
+                    self.letterboxRight.alpha = 0
+                    for constraint in self.playerContainer.superview!.constraints() {
+                        if let constraint = constraint as? NSLayoutConstraint {
+                            if constraint.firstItem as? UIView == self.playerContainer {
+                                constraint.active = false
+                            }
+                        }
+                    }
+                    self.view.layoutIfNeeded()
+                    self.playerContainer.frame.origin = CGPointMake(0,0)
+                    self.playerContainer.frame.size = self.playerView.frame.size
+            })
+        }
+        
+        else if currentMode == .Editor {
+            return //can't go forward from here yet
+        }
+        
+        //animate page
+        pageContainerLeftConstraint.constant = pageContainerLeftConstraint.constant - view.frame.width
+        UIView.animateWithDuration(0.45, animations: {
+            self.view.layoutIfNeeded()
+        })
+        
     }
     
     
@@ -361,22 +401,47 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         if currentMode == .Picker {
             return //cannot go back from picker
         }
-        changeViewTitleTo("Choose a video", duration: 0.45)
-        currentMode = .Picker
         
-        backBarButton.enabled = false
-        UIView.animateWithDuration(0.45, animations: {
-            self.backBarButton.tintColor = UIColor.clearColor()
-        })
-        nextBarButton.enabled = true
+        else if currentMode == .Duration {
+            changeViewTitleTo("Choose a video", duration: 0.45)
+            currentMode = .Picker
+            
+            backBarButton.enabled = false
+            UIView.animateWithDuration(0.45, animations: {
+                self.backBarButton.tintColor = UIColor.clearColor()
+            })
+            nextBarButton.enabled = true
+            
+            playerView.preferHeight(0, duration: 0.45, dampening: 1)
+            playerController?.player?.pause()
+        }
         
-        pageContainerLeftConstraint.constant = 0
+        else if currentMode == .Editor {
+            changeViewTitleTo("Trim Clip", duration: 0.45)
+            currentMode = .Duration
+            nextBarButton.enabled = true
+            playerView.shouldShrink = true
+            playerView.preferContentHeight(getPreferedContentHeight(), navbar: navBarHeight(), duration: 0.45, dampening: 0.8)
+            playerController?.player?.play()
+            
+            for constraint in playerStyleMask.superview!.constraints() {
+                if let constraint = constraint as? NSLayoutConstraint {
+                    if (constraint.firstItem as? UIView == playerStyleMask || constraint.secondItem as? UIView == playerStyleMask) && (constraint.firstAttribute == .Top || constraint.firstAttribute == .Bottom || constraint.firstAttribute == .Leading || constraint.firstAttribute == .Trailing) {
+                        constraint.constant += 50
+                    }
+                }
+            }
+            UIView.animateWithDuration(0.45, animations: {
+                self.view.layoutIfNeeded()
+            })
+            self.letterboxLeft.alpha = 1
+            self.letterboxRight.alpha = 1
+        }
+        
+        pageContainerLeftConstraint.constant = pageContainerLeftConstraint.constant + view.frame.width
         UIView.animateWithDuration(0.45, animations: {
             self.view.layoutIfNeeded()
         })
-        
-        playerView.preferHeight(0, duration: 0.45, dampening: 1)
-        playerController?.player?.pause()
     }
 
     
@@ -669,6 +734,15 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             durationAllowed(vineIcon, vineTextPosition)
         }
         
+    }
+    
+    
+    /**
+    * Editor use functions
+    */
+    
+    @IBAction func editorPinch(sender: UIPinchGestureRecognizer) {
+        println(sender.scale)
     }
     
     
