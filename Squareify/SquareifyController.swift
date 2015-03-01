@@ -50,6 +50,10 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBOutlet weak var vineIcon: UIImageView!
     @IBOutlet weak var vineTextPosition: NSLayoutConstraint!
     
+    @IBOutlet var editorPinch: UIPinchGestureRecognizer!
+    @IBOutlet var editorPan: UIPanGestureRecognizer!
+    
+    
     var fetch : PHFetchResult?
     let imageManager = PHImageManager()
     var playerController : AVPlayerViewController?
@@ -99,6 +103,8 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             edgePanRecognizer.edges = .Left
             edgePanRecognizer.delegate = self
             self.view.addGestureRecognizer(edgePanRecognizer)
+            editorPan.delegate = self
+            editorPinch.delegate = self
         }
         
     }
@@ -371,17 +377,10 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
                 }, completion: { success in
                     self.letterboxLeft.alpha = 0
                     self.letterboxRight.alpha = 0
-                    for constraint in self.playerContainer.superview!.constraints() {
-                        if let constraint = constraint as? NSLayoutConstraint {
-                            if constraint.firstItem as? UIView == self.playerContainer {
-                                constraint.active = false
-                            }
-                        }
-                    }
-                    self.view.layoutIfNeeded()
-                    self.playerContainer.frame.origin = CGPointMake(0,0)
-                    self.playerContainer.frame.size = self.playerView.frame.size
             })
+            
+            let videoSize = (playerController!.player.currentItem.asset.tracksWithMediaType(AVMediaTypeVideo)[0] as AVAssetTrack).naturalSize
+            playerContainer.frame.size = videoSize
         }
         
         else if currentMode == .Editor {
@@ -741,8 +740,51 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     * Editor use functions
     */
     
+    var originalSize : CGSize?
+    var originalPosition : CGPoint?
+    
     @IBAction func editorPinch(sender: UIPinchGestureRecognizer) {
-        println(sender.scale)
+        if sender.state == UIGestureRecognizerState.Began {
+            originalSize = playerContainer.frame.size
+            originalPosition = playerContainer.frame.origin
+        }
+        if let originalSize = originalSize {
+            let newSize = CGSizeMake(originalSize.width * sender.scale , originalSize.height * sender.scale)
+            let sizeDiff = CGSizeMake(newSize.width - originalSize.width, newSize.height - originalSize.height)
+            let newPosition = CGPointMake(originalPosition!.x - sizeDiff.width/2, originalPosition!.y - sizeDiff.height/2)
+            playerContainer.frame.size = newSize
+            playerContainer.frame.origin = newPosition
+        }
+        if sender.state == .Ended {
+            originalSize = nil
+            originalPosition = nil
+        }
+        
+    }
+    
+    var previousTranslation : CGPoint = CGPointMake(0, 0)
+    
+    @IBAction func editorPan(sender: UIPanGestureRecognizer) {
+        if sender.state == .Began {
+            previousTranslation = CGPointMake(0, 0)
+        }
+        
+        let translation = sender.translationInView(playerContainer)
+        let deltaX = translation.x - self.previousTranslation.x
+        let deltaY = translation.y - self.previousTranslation.y
+        self.previousTranslation = translation
+        
+        let newPosition = CGPointMake(playerContainer.frame.origin.x + deltaX, playerContainer.frame.origin.y + deltaY)
+        playerContainer.frame.origin = newPosition
+        
+        if let originalPosition = originalPosition {
+            let newPinchOriginalPosition = CGPointMake(originalPosition.x + deltaX, originalPosition.y + deltaY)
+            self.originalPosition = newPinchOriginalPosition
+        }
+        
+        if sender.state == .Ended {
+            previousTranslation = CGPointMake(0, 0)
+        }
     }
     
     

@@ -40,9 +40,6 @@
                                         <constraints>
                                             <constraint firstAttribute="width" secondItem="YlC-iZ-Ud7" secondAttribute="height" multiplier="255:256" id="N5D-Rx-D8Y"/>
                                         </constraints>
-                                        <connections>
-                                            <outletCollection property="gestureRecognizers" destination="2Wq-e1-3sg" appends="YES" id="bh0-nP-sYq"/>
-                                        </connections>
                                     </imageView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TUS-x1-No3" userLabel="Letterbox Left">
                                         <rect key="frame" x="0.0" y="0.0" width="33" height="256"/>
@@ -82,6 +79,7 @@
                                         </connections>
                                     </button>
                                 </subviews>
+                                <gestureRecognizers/>
                                 <constraints>
                                     <constraint firstItem="Xhc-Um-8eo" firstAttribute="leading" secondItem="q4t-xT-zIb" secondAttribute="trailing" id="0Y8-iK-10A"/>
                                     <constraint firstItem="vbw-kh-zhQ" firstAttribute="leading" secondItem="YlC-iZ-Ud7" secondAttribute="trailing" id="0eH-7b-mSr"/>
@@ -126,6 +124,10 @@
                                         <exclude reference="8Ha-S5-Lqk"/>
                                     </mask>
                                 </variation>
+                                <connections>
+                                    <outletCollection property="gestureRecognizers" destination="2Wq-e1-3sg" appends="YES" id="Bvp-SU-dtV"/>
+                                    <outletCollection property="gestureRecognizers" destination="Vx8-s4-Tyi" appends="YES" id="5Xh-l3-AXy"/>
+                                </connections>
                             </view>
                             <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jxh-fI-rm0" userLabel="No Videos Message">
                                 <rect key="frame" x="0.0" y="320" width="320" height="248"/>
@@ -591,6 +593,8 @@
                         <outlet property="backBarButton" destination="7FN-Bg-jZp" id="IGi-in-RtK"/>
                         <outlet property="durationDisplay" destination="O9u-lB-Uit" id="QuU-GK-Wfx"/>
                         <outlet property="durationEditor" destination="jMm-3V-9o0" id="Htd-cm-m6q"/>
+                        <outlet property="editorPan" destination="Vx8-s4-Tyi" id="pz8-4g-fkf"/>
+                        <outlet property="editorPinch" destination="2Wq-e1-3sg" id="zai-On-tKJ"/>
                         <outlet property="instagramIcon" destination="FXC-FI-sUp" id="1Mb-bC-CNB"/>
                         <outlet property="instagramTextPosition" destination="5ud-OK-Cbo" id="jcU-cJ-F2A"/>
                         <outlet property="letterboxLeft" destination="TUS-x1-No3" id="zA4-ah-T0f"/>
@@ -627,11 +631,16 @@
                         <outlet property="delegate" destination="blJ-Ad-SC4" id="MTT-Gn-klb"/>
                     </connections>
                 </panGestureRecognizer>
-                <pinchGestureRecognizer id="2Wq-e1-3sg">
+                <pinchGestureRecognizer id="2Wq-e1-3sg" userLabel="Editor Pinch">
                     <connections>
                         <action selector="editorPinch:" destination="blJ-Ad-SC4" id="j0l-BX-eB4"/>
                     </connections>
                 </pinchGestureRecognizer>
+                <panGestureRecognizer minimumNumberOfTouches="1" id="Vx8-s4-Tyi" userLabel="Editor Pan">
+                    <connections>
+                        <action selector="editorPan:" destination="blJ-Ad-SC4" id="W7x-52-HCH"/>
+                    </connections>
+                </panGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="-8" y="-698"/>
         </scene>
@@ -732,23 +741,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="BcI-DB-bbV" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-444" y="-675"/>
-        </scene>
-        <!--View Controller-->
-        <scene sceneID="aqQ-JP-3ED">
-            <objects>
-                <viewController id="bIU-4g-9Nu" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="3yv-eL-hkS"/>
-                        <viewControllerLayoutGuide type="bottom" id="vki-dm-KPO"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="0Uw-yl-yDq">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    </view>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="xQ0-tZ-gRO" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
         </scene>
     </scenes>
     <resources>
