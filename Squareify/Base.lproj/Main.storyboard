@@ -127,6 +127,7 @@
                                 <connections>
                                     <outletCollection property="gestureRecognizers" destination="2Wq-e1-3sg" appends="YES" id="Bvp-SU-dtV"/>
                                     <outletCollection property="gestureRecognizers" destination="Vx8-s4-Tyi" appends="YES" id="5Xh-l3-AXy"/>
+                                    <outletCollection property="gestureRecognizers" destination="BKn-HO-GR1" appends="YES" id="4he-Ey-pp5"/>
                                 </connections>
                             </view>
                             <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jxh-fI-rm0" userLabel="No Videos Message">
@@ -641,6 +642,11 @@
                         <action selector="editorPan:" destination="blJ-Ad-SC4" id="W7x-52-HCH"/>
                     </connections>
                 </panGestureRecognizer>
+                <rotationGestureRecognizer id="BKn-HO-GR1" userLabel="Editor Rotate">
+                    <connections>
+                        <action selector="editorRotate:" destination="blJ-Ad-SC4" id="lJR-ka-gSC"/>
+                    </connections>
+                </rotationGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="-8" y="-698"/>
         </scene>

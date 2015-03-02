@@ -787,6 +787,24 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         }
     }
     
+    var previousRotate : CGFloat = 0
+    @IBAction func editorRotate(sender: UIRotationGestureRecognizer) {
+        if sender.state == .Began {
+            previousRotate = 0
+        }
+        
+        let rotation = sender.rotation
+        let deltaTheta = rotation - previousRotate
+        previousRotate = rotation
+        
+        let transform = CGAffineTransformRotate(playerContainer.transform, deltaTheta)
+        playerContainer.transform = transform
+        
+        if sender.state == .Ended {
+            previousRotate = 0
+        }
+    }
+    
     
     /**
     * Ad Delegate - bring the banner on screen when it has an ad to display, move off when it doesn't
