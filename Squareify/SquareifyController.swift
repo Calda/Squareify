@@ -364,23 +364,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             nextBarButton.enabled = false
             playerView.shouldShrink = false
             playerView.preferAspect(1, duration: 0.45, dampening: 1)
-            
-            for constraint in playerStyleMask.superview!.constraints() {
-                if let constraint = constraint as? NSLayoutConstraint {
-                    if (constraint.firstItem as? UIView == playerStyleMask || constraint.secondItem as? UIView == playerStyleMask) && (constraint.firstAttribute == .Top || constraint.firstAttribute == .Bottom || constraint.firstAttribute == .Leading || constraint.firstAttribute == .Trailing) {
-                        constraint.constant -= 50
-                    }
-                }
-            }
-            UIView.animateWithDuration(0.45, animations: {
-                    self.view.layoutIfNeeded()
-                }, completion: { success in
-                    self.letterboxLeft.alpha = 0
-                    self.letterboxRight.alpha = 0
-            })
-            
-            let videoSize = (playerController!.player.currentItem.asset.tracksWithMediaType(AVMediaTypeVideo)[0] as AVAssetTrack).naturalSize
-            playerContainer.frame.size = videoSize
+            prepareEditorView()
         }
         
         else if currentMode == .Editor {
@@ -422,19 +406,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             playerView.shouldShrink = true
             playerView.preferContentHeight(getPreferedContentHeight(), navbar: navBarHeight(), duration: 0.45, dampening: 0.8)
             playerController?.player?.play()
-            
-            for constraint in playerStyleMask.superview!.constraints() {
-                if let constraint = constraint as? NSLayoutConstraint {
-                    if (constraint.firstItem as? UIView == playerStyleMask || constraint.secondItem as? UIView == playerStyleMask) && (constraint.firstAttribute == .Top || constraint.firstAttribute == .Bottom || constraint.firstAttribute == .Leading || constraint.firstAttribute == .Trailing) {
-                        constraint.constant += 50
-                    }
-                }
-            }
-            UIView.animateWithDuration(0.45, animations: {
-                self.view.layoutIfNeeded()
-            })
-            self.letterboxLeft.alpha = 1
-            self.letterboxRight.alpha = 1
+            teardownEditorView()
         }
         
         pageContainerLeftConstraint.constant = pageContainerLeftConstraint.constant + view.frame.width
@@ -489,6 +461,9 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         updateDurationDisplays(currentAsset()!.duration)
         resetTimelineControls()
         populateTimelineView()
+        delay(0.4) {
+            self.animateInHandles()
+        }
     }
     
     
@@ -545,7 +520,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
                         }, completion: nil)
                     //animate in handles when left image in on screen
                     if frame == count - 1 {
-                        self.animateInHandles()
                         //bring handles' nonSelectionView to front of timeline after images are presented
                         if let (right, left) = self.timelineHandles? {
                             right.addNonSelectionView()
@@ -682,7 +656,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             return CMTimeMakeWithSeconds(seconds, assetDuration.timescale)
         }
         
-        if self.currentMode == .Duration {
+        if self.currentMode != .Picker {
             if let (left, right) = timelineHandles {
                 let selectionLeft = left.frame.origin.x - timelineView.frame.origin.x
                 let selectionRight = (right.frame.origin.x + right.frame.width) - timelineView.frame.origin.x
@@ -740,30 +714,84 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     * Editor use functions
     */
     
-    var originalSize : CGSize?
-    var originalPosition : CGPoint?
+    func prepareEditorView() {
+        //animate out style mask
+        for constraint in playerStyleMask.superview!.constraints() {
+            if let constraint = constraint as? NSLayoutConstraint {
+                if (constraint.firstItem as? UIView == playerStyleMask || constraint.secondItem as? UIView == playerStyleMask) && (constraint.firstAttribute == .Top || constraint.firstAttribute == .Bottom || constraint.firstAttribute == .Leading || constraint.firstAttribute == .Trailing) {
+                    constraint.constant -= 50
+                }
+            }
+        }
+        UIView.animateWithDuration(0.45, animations: {
+            self.view.layoutIfNeeded()
+            }, completion: { success in
+                self.letterboxLeft.alpha = 0
+                self.letterboxRight.alpha = 0
+        })
+        
+        let videoSize = getCorrectedAssetSize(currentAsset()!)
+        if videoSize.width > videoSize.height { //landscape
+            let realHeight = playerView.frame.height
+            let realWidth = (realHeight/videoSize.height) * videoSize.width
+            let xOffset = -(realWidth - playerView.frame.width) / 2
+            UIView.animateWithDuration(0.45, animations: {
+                self.playerContainer.frame.origin = CGPointMake(xOffset, 0)
+                self.playerContainer.frame.size = CGSizeMake(realWidth, realHeight)
+            })
+            
+        }
+        else if videoSize.width < videoSize.height { //portrait
+            let realWidth = playerView.frame.width
+            let realHeight = (realWidth/videoSize.width) * videoSize.height
+            let yOffset = -(realHeight - playerView.frame.height) / 2
+            UIView.animateWithDuration(0.45, animations: {
+                self.playerContainer.frame.origin = CGPointMake(0, yOffset)
+                self.playerContainer.frame.size = CGSizeMake(realWidth, realHeight)
+            })
+            
+        }
+    }
     
+    
+    func teardownEditorView() {
+        for constraint in playerStyleMask.superview!.constraints() {
+            if let constraint = constraint as? NSLayoutConstraint {
+                if (constraint.firstItem as? UIView == playerStyleMask || constraint.secondItem as? UIView == playerStyleMask) && (constraint.firstAttribute == .Top || constraint.firstAttribute == .Bottom || constraint.firstAttribute == .Leading || constraint.firstAttribute == .Trailing) {
+                    constraint.constant += 50
+                }
+            }
+        }
+        UIView.animateWithDuration(0.45, animations: {
+            self.view.layoutIfNeeded()
+        })
+        self.letterboxLeft.alpha = 1
+        self.letterboxRight.alpha = 1
+        playerContainer.transform = CGAffineTransformMakeRotation(0)
+    }
+    
+    
+    var previousScale : CGFloat = 1
     @IBAction func editorPinch(sender: UIPinchGestureRecognizer) {
         if sender.state == UIGestureRecognizerState.Began {
-            originalSize = playerContainer.frame.size
-            originalPosition = playerContainer.frame.origin
+            previousScale = 1
         }
-        if let originalSize = originalSize {
-            let newSize = CGSizeMake(originalSize.width * sender.scale , originalSize.height * sender.scale)
-            let sizeDiff = CGSizeMake(newSize.width - originalSize.width, newSize.height - originalSize.height)
-            let newPosition = CGPointMake(originalPosition!.x - sizeDiff.width/2, originalPosition!.y - sizeDiff.height/2)
-            playerContainer.frame.size = newSize
-            playerContainer.frame.origin = newPosition
-        }
+        let scale = sender.scale
+        let deltaScale = -(scale - previousScale)
+        previousScale = scale
+        
+        let scaleFactor = (1 - deltaScale)
+        let transform = CGAffineTransformScale(playerContainer.transform, scaleFactor, scaleFactor)
+        playerContainer.transform = transform
+        
         if sender.state == .Ended {
-            originalSize = nil
-            originalPosition = nil
+            previousScale = 1
         }
         
     }
     
-    var previousTranslation : CGPoint = CGPointMake(0, 0)
     
+    var previousTranslation : CGPoint = CGPointMake(0, 0)
     @IBAction func editorPan(sender: UIPanGestureRecognizer) {
         if sender.state == .Began {
             previousTranslation = CGPointMake(0, 0)
@@ -774,13 +802,8 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         let deltaY = translation.y - self.previousTranslation.y
         self.previousTranslation = translation
         
-        let newPosition = CGPointMake(playerContainer.frame.origin.x + deltaX, playerContainer.frame.origin.y + deltaY)
-        playerContainer.frame.origin = newPosition
-        
-        if let originalPosition = originalPosition {
-            let newPinchOriginalPosition = CGPointMake(originalPosition.x + deltaX, originalPosition.y + deltaY)
-            self.originalPosition = newPinchOriginalPosition
-        }
+        let transform = CGAffineTransformTranslate(playerContainer.transform, deltaX, deltaY)
+        playerContainer.transform = transform
         
         if sender.state == .Ended {
             previousTranslation = CGPointMake(0, 0)
@@ -853,6 +876,16 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             return correctedFrame
         }
         return nil
+    }
+    
+    
+    func getCorrectedAssetSize(asset: AVAsset) -> CGSize {
+        let track = asset.tracksWithMediaType(AVMediaTypeVideo)[0] as AVAssetTrack
+        let naturalSize = track.naturalSize
+        let transform = track.preferredTransform
+        let rect = CGRectMake(0, 0, naturalSize.width, naturalSize.height)
+        let correctedRect = CGRectApplyAffineTransform(rect, transform)
+        return correctedRect.size
     }
     
     
