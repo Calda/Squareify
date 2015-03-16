@@ -27,6 +27,8 @@
 		2ED6A1911A7D6799006032E8 /* style mask with arrow.png in Resources */ = {isa = PBXBuildFile; fileRef = 2ED6A1901A7D6799006032E8 /* style mask with arrow.png */; };
 		2ED6A1931A7D68B9006032E8 /* style mask no arrow.png in Resources */ = {isa = PBXBuildFile; fileRef = 2ED6A1921A7D68B9006032E8 /* style mask no arrow.png */; };
 		2EDC8A741A7B0CC40085EE38 /* PickerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EDC8A731A7B0CC40085EE38 /* PickerCell.swift */; };
+		2EF9F0D01AB653FB009AE4C2 /* EditSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EF9F0CF1AB653FB009AE4C2 /* EditSession.swift */; };
+		2EF9F0D21AB6593D009AE4C2 /* play-placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = 2EF9F0D11AB6593D009AE4C2 /* play-placeholder.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,6 +65,8 @@
 		2ED6A1901A7D6799006032E8 /* style mask with arrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "style mask with arrow.png"; sourceTree = "<group>"; };
 		2ED6A1921A7D68B9006032E8 /* style mask no arrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "style mask no arrow.png"; sourceTree = "<group>"; };
 		2EDC8A731A7B0CC40085EE38 /* PickerCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PickerCell.swift; sourceTree = "<group>"; };
+		2EF9F0CF1AB653FB009AE4C2 /* EditSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditSession.swift; sourceTree = "<group>"; };
+		2EF9F0D11AB6593D009AE4C2 /* play-placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "play-placeholder.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,6 +125,7 @@
 				2E74538A1A9A589E00D0A819 /* PlayerView.swift */,
 				2EDC8A731A7B0CC40085EE38 /* PickerCell.swift */,
 				2E89AC2E1A8D70A30006F9E3 /* TimelineHandle.swift */,
+				2EF9F0CF1AB653FB009AE4C2 /* EditSession.swift */,
 				2E32997E1A6318AC00991FD3 /* AppDelegate.swift */,
 				2E3299851A6318AC00991FD3 /* Images.xcassets */,
 				2E3299871A6318AC00991FD3 /* LaunchScreen.xib */,
@@ -132,6 +137,7 @@
 		2E32997C1A6318AC00991FD3 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				2EF9F0D11AB6593D009AE4C2 /* play-placeholder.png */,
 				2E5522221A8FA9D70036036D /* instagram icon 320.png */,
 				2E5522231A8FA9D70036036D /* vine icon 340.png */,
 				2ED6A1921A7D68B9006032E8 /* style mask no arrow.png */,
@@ -225,6 +231,7 @@
 				2E95F1C71A673D78009BD74F /* testvideo.mov in Resources */,
 				2ED6A1931A7D68B9006032E8 /* style mask no arrow.png in Resources */,
 				2E3299841A6318AC00991FD3 /* Main.storyboard in Resources */,
+				2EF9F0D21AB6593D009AE4C2 /* play-placeholder.png in Resources */,
 				2EBDFDEB1A9A93DB003B5D56 /* license.txt in Resources */,
 				2ED6A1911A7D6799006032E8 /* style mask with arrow.png in Resources */,
 				2E3299891A6318AC00991FD3 /* LaunchScreen.xib in Resources */,
@@ -250,6 +257,7 @@
 			files = (
 				2EDC8A741A7B0CC40085EE38 /* PickerCell.swift in Sources */,
 				2E89AC2F1A8D70A30006F9E3 /* TimelineHandle.swift in Sources */,
+				2EF9F0D01AB653FB009AE4C2 /* EditSession.swift in Sources */,
 				2E74538B1A9A589E00D0A819 /* PlayerView.swift in Sources */,
 				2E32997F1A6318AC00991FD3 /* AppDelegate.swift in Sources */,
 				2E3E65211A7F07CE004D9F55 /* SquareifyController.swift in Sources */,

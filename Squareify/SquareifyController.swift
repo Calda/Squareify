@@ -58,6 +58,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     let imageManager = PHImageManager()
     var playerController : AVPlayerViewController?
     var playerMuted = true
+    var editSession : EditSession?
     
     //will change for iPhone 4S support
     @IBOutlet weak var playerContainerAspectConstraint: NSLayoutConstraint!
@@ -716,6 +717,8 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     func prepareEditorView() {
         //animate out style mask
+        playerController!.player.pause()
+        playerController!.player.seekToTime(kCMTimeZero)
         for constraint in playerStyleMask.superview!.constraints() {
             if let constraint = constraint as? NSLayoutConstraint {
                 if (constraint.firstItem as? UIView == playerStyleMask || constraint.secondItem as? UIView == playerStyleMask) && (constraint.firstAttribute == .Top || constraint.firstAttribute == .Bottom || constraint.firstAttribute == .Leading || constraint.firstAttribute == .Trailing) {
@@ -754,6 +757,13 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     }
     
     
+    @IBAction func startEditSession() {
+        editSession = EditSession(asset: currentAsset()!)
+        saveEditorTransform()
+        playerController!.player.play()
+    }
+    
+    
     func teardownEditorView() {
         for constraint in playerStyleMask.superview!.constraints() {
             if let constraint = constraint as? NSLayoutConstraint {
@@ -768,6 +778,11 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         self.letterboxLeft.alpha = 1
         self.letterboxRight.alpha = 1
         playerContainer.transform = CGAffineTransformMakeRotation(0)
+    }
+    
+    
+    func saveEditorTransform() {
+        editSession?.addTransform(playerController!.player.currentTime(), transform: playerContainer.transform)
     }
     
     
@@ -787,7 +802,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         if sender.state == .Ended {
             previousScale = 1
         }
-        
+        saveEditorTransform()
     }
     
     
@@ -808,10 +823,12 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         if sender.state == .Ended {
             previousTranslation = CGPointMake(0, 0)
         }
+        saveEditorTransform()
     }
     
     var previousRotate : CGFloat = 0
     @IBAction func editorRotate(sender: UIRotationGestureRecognizer) {
+        return
         if sender.state == .Began {
             previousRotate = 0
         }
@@ -826,6 +843,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         if sender.state == .Ended {
             previousRotate = 0
         }
+        saveEditorTransform()
     }
     
     
@@ -951,6 +969,11 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         if self.isViewLoaded() && self.view.window != nil {
             playerController?.player.seekToTime(self.getSelectionRange().start, toleranceBefore: kCMTimeZero, toleranceAfter: kCMTimeZero)
             playerController?.player.play()
+            if editSession != nil {
+                let session = editSession!
+                playerController!.player.pause()
+                session.export()
+            }
         }
     }
     
