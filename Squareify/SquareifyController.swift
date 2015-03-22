@@ -59,6 +59,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     var playerController : AVPlayerViewController?
     var playerMuted = true
     var editSession : EditSession?
+    var editPreviewUnscaledSize : CGSize?
     
     //will change for iPhone 4S support
     @IBOutlet weak var playerContainerAspectConstraint: NSLayoutConstraint!
@@ -752,13 +753,14 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
                 self.playerContainer.frame.origin = CGPointMake(0, yOffset)
                 self.playerContainer.frame.size = CGSizeMake(realWidth, realHeight)
             })
-            
         }
+        editPreviewUnscaledSize = self.playerContainer.frame.size
+
     }
     
     
     @IBAction func startEditSession() {
-        editSession = EditSession(asset: currentAsset()!)
+        editSession = EditSession(asset: currentAsset()!, previewSize: editPreviewUnscaledSize!)
         saveEditorTransform()
         playerController!.player.play()
     }
