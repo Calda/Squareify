@@ -790,6 +790,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     var previousScale : CGFloat = 1
     @IBAction func editorPinch(sender: UIPinchGestureRecognizer) {
+        return
         if sender.state == UIGestureRecognizerState.Began {
             previousScale = 1
         }
@@ -810,6 +811,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     var previousTranslation : CGPoint = CGPointMake(0, 0)
     @IBAction func editorPan(sender: UIPanGestureRecognizer) {
+        return
         if sender.state == .Began {
             previousTranslation = CGPointMake(0, 0)
         }
@@ -830,7 +832,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     var previousRotate : CGFloat = 0
     @IBAction func editorRotate(sender: UIRotationGestureRecognizer) {
-        return
         if sender.state == .Began {
             previousRotate = 0
         }

@@ -62,6 +62,13 @@ class EditSession {
             txActual += (correctedSize.width - scale * correctedSize.width) / 2
             tyActual += (correctedSize.width - scale * correctedSize.height) / 2
             
+            //fix rotation
+            let angle = theta(adjustedForPreferred)
+            let offset = calculateRotationOffset(angle, height: correctedSize.height, width: correctedSize.width)
+            println("(\(offset.x), \(offset.y))")
+            txActual -= offset.x
+            txActual -= offset.y
+            
             let fixed = CGAffineTransformTranslate(adjustedForPreferred, txActual / scale, tyActual / scale)
             
             transformer.setTransform(fixed, atTime: time)
@@ -91,6 +98,42 @@ class EditSession {
     
     func xscale(t: CGAffineTransform) -> CGFloat {
         return sqrt(t.a * t.a + t.c * t.c)
+    }
+    
+    func theta(t: CGAffineTransform) -> CGFloat {
+        return atan2(t.b, t.a)
+    }
+    
+    func calculateRotationOffset(angle: CGFloat, height: CGFloat, width: CGFloat) -> CGPoint{
+        var thetaUnclamped = Double(angle)
+        if thetaUnclamped < 0 {
+            thetaUnclamped = (2 * M_PI) - thetaUnclamped
+        }
+        let h = Double(height)
+        let w = Double(width)
+        //radians to degrees
+        let degrees = (thetaUnclamped % (2*M_PI)) * (180/M_PI)
+        //clamp theta to [0,90]
+        let theta = thetaUnclamped % (M_PI/2)
+        
+        var x : Double = 0
+        var y : Double = 0
+        if degrees <= 90 {
+            y = w * sin(theta) //x=0
+        }
+        else if degrees > 90 && degrees <= 180 {
+            x = h * sin(theta)
+            y = w * sin(theta) + h * cos(theta)
+        }
+        else if degrees > 180 && degrees <= 270 {
+            x = h * sin(theta) + w * cos(theta)
+            y = h * cos(theta)
+        }
+        else { //degrees > 270
+            x = w * cos(theta) //y=0
+        }
+        
+        return CGPointMake(CGFloat(x), CGFloat(y))
     }
     
     
