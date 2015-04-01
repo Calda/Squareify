@@ -9,6 +9,7 @@
 import Foundation
 import AVFoundation
 import Photos
+import CoreGraphics
 
 class EditSession {
     
@@ -75,6 +76,7 @@ class EditSession {
         }
         
         instruction.layerInstructions = [transformer]
+        instruction.backgroundColor = CGColorCreate(CGColorSpaceCreateDeviceRGB(), [1.0, 0.5, 0.5])
         composition.instructions = [instruction]
         
         let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as NSString

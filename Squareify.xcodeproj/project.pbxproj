@@ -29,6 +29,8 @@
 		2EDC8A741A7B0CC40085EE38 /* PickerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EDC8A731A7B0CC40085EE38 /* PickerCell.swift */; };
 		2EF9F0D01AB653FB009AE4C2 /* EditSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EF9F0CF1AB653FB009AE4C2 /* EditSession.swift */; };
 		2EF9F0D21AB6593D009AE4C2 /* play-placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = 2EF9F0D11AB6593D009AE4C2 /* play-placeholder.png */; };
+		449E88C11ACC5DFA0034955B /* ColorCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449E88C01ACC5DFA0034955B /* ColorCollection.swift */; };
+		44AAB8B71ACC6936009756CB /* colors.txt in Resources */ = {isa = PBXBuildFile; fileRef = 44AAB8B61ACC6936009756CB /* colors.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +69,8 @@
 		2EDC8A731A7B0CC40085EE38 /* PickerCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PickerCell.swift; sourceTree = "<group>"; };
 		2EF9F0CF1AB653FB009AE4C2 /* EditSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditSession.swift; sourceTree = "<group>"; };
 		2EF9F0D11AB6593D009AE4C2 /* play-placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "play-placeholder.png"; sourceTree = "<group>"; };
+		449E88C01ACC5DFA0034955B /* ColorCollection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorCollection.swift; sourceTree = "<group>"; };
+		44AAB8B61ACC6936009756CB /* colors.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = colors.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -130,6 +134,7 @@
 				2E3299851A6318AC00991FD3 /* Images.xcassets */,
 				2E3299871A6318AC00991FD3 /* LaunchScreen.xib */,
 				2E32997C1A6318AC00991FD3 /* Supporting Files */,
+				449E88C01ACC5DFA0034955B /* ColorCollection.swift */,
 			);
 			path = Squareify;
 			sourceTree = "<group>";
@@ -144,6 +149,7 @@
 				2ED6A1901A7D6799006032E8 /* style mask with arrow.png */,
 				2E95F1C61A673D78009BD74F /* testvideo.mov */,
 				2E32997D1A6318AC00991FD3 /* Info.plist */,
+				44AAB8B61ACC6936009756CB /* colors.txt */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -238,6 +244,7 @@
 				2E3299861A6318AC00991FD3 /* Images.xcassets in Resources */,
 				2E5522251A8FA9D70036036D /* vine icon 340.png in Resources */,
 				2E5522241A8FA9D70036036D /* instagram icon 320.png in Resources */,
+				44AAB8B71ACC6936009756CB /* colors.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -257,6 +264,7 @@
 			files = (
 				2EDC8A741A7B0CC40085EE38 /* PickerCell.swift in Sources */,
 				2E89AC2F1A8D70A30006F9E3 /* TimelineHandle.swift in Sources */,
+				449E88C11ACC5DFA0034955B /* ColorCollection.swift in Sources */,
 				2EF9F0D01AB653FB009AE4C2 /* EditSession.swift in Sources */,
 				2E74538B1A9A589E00D0A819 /* PlayerView.swift in Sources */,
 				2E32997F1A6318AC00991FD3 /* AppDelegate.swift in Sources */,
