@@ -29,7 +29,7 @@ class EditSession {
     }
     
     
-    func export() {
+    func export(backgrondColor : UIColor = UIColor.blackColor()) {
         let track = asset.tracksWithMediaType(AVMediaTypeVideo)[0] as AVAssetTrack
         let correctedSize = getCorrectedAssetSize(asset)
         let composition = AVMutableVideoComposition()
@@ -76,7 +76,7 @@ class EditSession {
         }
         
         instruction.layerInstructions = [transformer]
-        instruction.backgroundColor = CGColorCreate(CGColorSpaceCreateDeviceRGB(), [1.0, 0.5, 0.5])
+        instruction.backgroundColor = backgrondColor.CGColor
         composition.instructions = [instruction]
         
         let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as NSString

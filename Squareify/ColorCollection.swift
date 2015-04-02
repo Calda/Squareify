@@ -10,11 +10,14 @@
 import Foundation
 import UIKit
 
+let SQColorNotification : String = "SQColorNotification"
+
 class ColorCollection : UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
     @IBOutlet weak var collection: UICollectionView!
     @IBOutlet weak var handle: UIView!
     var colorConfig : [String] = []
+    var currentSelection : UIColor = UIColor.darkGrayColor()
     
     override func viewWillAppear(animated: Bool) {
         let bundle = NSBundle.mainBundle()
@@ -53,23 +56,31 @@ class ColorCollection : UIViewController, UICollectionViewDataSource, UICollecti
         NSScanner(string: bString).scanHexInt(&b)
         let background = UIColor(red: CGFloat(r) / CGFloat(255.0), green: CGFloat(g) / CGFloat(255.0), blue: CGFloat(b) / CGFloat(255.0), alpha: 1.0)
         
-        let lumaR : CGFloat = CGFloat(r) * 0.3
-        let lumaG : CGFloat = CGFloat(g) * 0.59
-        let lumaB : CGFloat = CGFloat(b) * 0.11
-        let luma = (lumaR + lumaG + lumaB) / 3 / 255
-        var textBrightDiff : CGFloat = 0.5
-        if luma > 0.14 { textBrightDiff *= -1 }
+        func colorLuma(color: UIColor) -> CGFloat{
+            var r : CGFloat  = 0.0
+            var g : CGFloat  = 0.0
+            var b : CGFloat  = 0.0
+            color.getRed(&r, green: &g, blue: &b, alpha: nil)
+            let lumaR : CGFloat = CGFloat(r) * 0.3
+            let lumaG : CGFloat = CGFloat(g) * 0.59
+            let lumaB : CGFloat = CGFloat(b) * 0.11
+            return (lumaR + lumaG + lumaB) / 3
+        }
         
         var hue : CGFloat  = 0.0
         var sat : CGFloat  = 0.0
         var bright : CGFloat  = 0.0
         background.getHue(&hue, saturation: &sat, brightness: &bright, alpha: nil)
+        let backgroundLuma = colorLuma(background)
+
+        var text = UIColor(hue: hue, saturation: sat, brightness: bright + 0.35, alpha: 1.0)
+        let textLuma = colorLuma(text)
+        let lumaDiff = abs(textLuma - backgroundLuma)
+        if lumaDiff < 0.05 {
+            text = UIColor(hue: hue, saturation: sat, brightness: bright - 0.35, alpha: 1.0)
+        }
         
-        var textBright = bright + textBrightDiff
-        let text = UIColor(hue: hue, saturation: sat - 0.3, brightness: textBright, alpha: 1.0)
-        
-        var borderBright = bright + 0.1
-        let border = UIColor(hue: hue, saturation: sat, brightness: borderBright, alpha: 1.0)
+        let border = UIColor(hue: hue, saturation: sat, brightness: bright - 0.1, alpha: 1.0)
         
         return (background, text, border)
     }
@@ -99,11 +110,11 @@ class ColorCollection : UIViewController, UICollectionViewDataSource, UICollecti
         cell.name.textColor = text
         cell.color.backgroundColor = background
         cell.addBorderOfColor(border)
-        if collectionView.indexPathsForSelectedItems().count == 1 {
-            if let selected = collectionView.indexPathsForSelectedItems()[0] as? ColorCell {
-                selected.animateSelection()
-            }
+
+        if CGColorEqualToColor(currentSelection.CGColor, background.CGColor) {
+            cell.animateSelection()
         }
+        
         return cell
     }
     
@@ -125,7 +136,12 @@ class ColorCollection : UIViewController, UICollectionViewDataSource, UICollecti
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         if let cell = collectionView.cellForItemAtIndexPath(indexPath) as? ColorCell {
-            cell.animateSelection()
+            let color = cell.color.backgroundColor!
+            if !CGColorEqualToColor(currentSelection.CGColor, color.CGColor) {
+                cell.animateSelection()
+                currentSelection = color
+                NSNotificationCenter.defaultCenter().postNotificationName(SQColorNotification, object: color)
+            }
         }
     }
     

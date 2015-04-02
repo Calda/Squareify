@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6751" systemVersion="14C109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="IQd-dk-E0j">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6751" systemVersion="14D105g" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="IQd-dk-E0j">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6736"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
@@ -71,7 +71,7 @@
                                         </constraints>
                                         <color key="tintColor" red="0.32156862749999998" green="0.80000000000000004" blue="0.79607843140000001" alpha="1" colorSpace="calibratedRGB"/>
                                         <state key="normal" title="Button" image="mute">
-                                            <color key="titleColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <color key="titleColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                         </state>
                                         <state key="selected" image="mute-filled"/>
                                         <state key="highlighted" image="unmute"/>
@@ -285,8 +285,8 @@
                                 <rect key="frame" x="0.0" y="320" width="320" height="248"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </view>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="EE3-xi-jyn" userLabel="Bottom Content">
-                                <rect key="frame" x="0.0" y="320" width="960" height="248"/>
+                            <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EE3-xi-jyn" userLabel="Bottom Content">
+                                <rect key="frame" x="-640" y="320" width="960" height="248"/>
                                 <subviews>
                                     <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" indicatorStyle="white" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="HHG-qL-iqb">
                                         <rect key="frame" x="0.0" y="0.0" width="320" height="248"/>
@@ -409,7 +409,7 @@
                                                 <constraints>
                                                     <constraint firstAttribute="width" secondItem="O9u-lB-Uit" secondAttribute="height" multiplier="1:1" id="EIY-hb-25F"/>
                                                 </constraints>
-                                                <fontDescription key="fontDescription" type="system" pointSize="31"/>
+                                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="31"/>
                                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
@@ -507,9 +507,24 @@
                                                     <action selector="startEditSession" destination="blJ-Ad-SC4" eventType="touchUpInside" id="4mt-4n-SG9"/>
                                                 </connections>
                                             </button>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Wdr-HY-fue">
+                                                <rect key="frame" x="118" y="79" width="84" height="30"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="width" constant="84" id="Oyj-qD-7YV"/>
+                                                    <constraint firstAttribute="height" constant="30" id="WPN-nB-j49"/>
+                                                </constraints>
+                                                <state key="normal" title="Background">
+                                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                </state>
+                                                <connections>
+                                                    <action selector="pullUpColorPicker:" destination="blJ-Ad-SC4" eventType="touchUpInside" id="FNA-yx-BCo"/>
+                                                </connections>
+                                            </button>
                                         </subviews>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         <constraints>
+                                            <constraint firstItem="Wdr-HY-fue" firstAttribute="top" secondItem="INi-Sr-dEl" secondAttribute="bottom" constant="21" id="jh8-nb-qOG"/>
+                                            <constraint firstAttribute="centerX" secondItem="Wdr-HY-fue" secondAttribute="centerX" id="odd-JG-PJN"/>
                                             <constraint firstItem="INi-Sr-dEl" firstAttribute="top" secondItem="FTg-sZ-grU" secondAttribute="topMargin" id="sJf-GR-RsI"/>
                                             <constraint firstItem="INi-Sr-dEl" firstAttribute="centerX" secondItem="FTg-sZ-grU" secondAttribute="centerX" id="yQA-yM-X0u"/>
                                         </constraints>
@@ -556,7 +571,7 @@
                                 </connections>
                             </adBannerView>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xQR-7p-jYk" userLabel="Colors Container">
-                                <rect key="frame" x="0.0" y="358" width="320" height="415"/>
+                                <rect key="frame" x="0.0" y="568" width="320" height="415"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="415" id="HfF-s6-4Zo"/>
                                 </constraints>
@@ -599,7 +614,7 @@
                             <constraint firstAttribute="bottom" secondItem="K4F-yr-JC9" secondAttribute="bottom" id="hhT-ca-L8V"/>
                             <constraint firstItem="xQR-7p-jYk" firstAttribute="leading" secondItem="J3h-qN-MqL" secondAttribute="leading" id="hmD-AT-Gr8"/>
                             <constraint firstItem="6fM-0Q-KWN" firstAttribute="top" secondItem="J3h-qN-MqL" secondAttribute="top" id="iSq-O7-nD9"/>
-                            <constraint firstAttribute="bottom" secondItem="xQR-7p-jYk" secondAttribute="bottom" constant="-205" id="kOG-Gk-FJj"/>
+                            <constraint firstAttribute="bottom" secondItem="xQR-7p-jYk" secondAttribute="bottom" constant="-415" id="kOG-Gk-FJj"/>
                             <constraint firstItem="K4F-yr-JC9" firstAttribute="top" secondItem="jxh-fI-rm0" secondAttribute="bottom" id="kwa-iC-89j"/>
                             <constraint firstAttribute="trailing" secondItem="xQR-7p-jYk" secondAttribute="trailing" id="kz2-2V-Af6"/>
                             <constraint firstItem="Inz-DY-7At" firstAttribute="top" secondItem="Dzm-rC-b07" secondAttribute="bottom" id="lAp-Mf-DuT"/>
@@ -651,6 +666,7 @@
                         <outlet property="adPositionConstraint" destination="Ejt-WZ-jZU" id="av6-Ev-WVt"/>
                         <outlet property="backBarButton" destination="7FN-Bg-jZp" id="IGi-in-RtK"/>
                         <outlet property="colorPickerConstraint" destination="kOG-Gk-FJj" id="Swu-GY-Hxy"/>
+                        <outlet property="colorPickerContainer" destination="xQR-7p-jYk" id="YAa-Ub-iJZ"/>
                         <outlet property="durationDisplay" destination="O9u-lB-Uit" id="QuU-GK-Wfx"/>
                         <outlet property="durationEditor" destination="jMm-3V-9o0" id="Htd-cm-m6q"/>
                         <outlet property="editorPan" destination="Vx8-s4-Tyi" id="pz8-4g-fkf"/>
@@ -898,23 +914,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ysy-V4-QmK" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-8" y="-147.5"/>
-        </scene>
-        <!--View Controller-->
-        <scene sceneID="lmU-ff-VY0">
-            <objects>
-                <viewController id="Jti-Oy-EiL" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="Eiu-uz-87w"/>
-                        <viewControllerLayoutGuide type="bottom" id="UEK-6M-8Km"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="Y8y-IS-Rli">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    </view>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="gKq-Zc-T4d" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
         </scene>
     </scenes>
     <resources>

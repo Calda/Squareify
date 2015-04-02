@@ -54,6 +54,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBOutlet var editorPan: UIPanGestureRecognizer!
     
     @IBOutlet weak var colorPickerConstraint: NSLayoutConstraint!
+    @IBOutlet weak var colorPickerContainer: UIView!
     
     var fetch : PHFetchResult?
     let imageManager = PHImageManager()
@@ -61,6 +62,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     var playerMuted = true
     var editSession : EditSession?
     var editPreviewUnscaledSize : CGSize?
+    var userBackgroundColor : UIColor = UIColor.blackColor()
     
     //will change for iPhone 4S support
     @IBOutlet weak var playerContainerAspectConstraint: NSLayoutConstraint!
@@ -76,6 +78,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     override func viewWillAppear(animated: Bool) {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "loopPlayerVideo", name: AVPlayerItemDidPlayToEndTimeNotification, object: nil) //set up video looping
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "colorPickerListener:", name: SQColorNotification, object: nil)
         AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryAmbient, error: nil)
         
         let screenAspect = self.view.frame.width / self.view.frame.height
@@ -829,6 +832,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         saveEditorTransform()
     }
     
+    
     var previousRotate : CGFloat = 0
     @IBAction func editorRotate(sender: UIRotationGestureRecognizer) {
         return
@@ -849,16 +853,52 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         saveEditorTransform()
     }
     
+    
+    /**
+    * Background Color Picker
+    **/
+    
     var startConstant : CGFloat = 0.0
     let resting : CGFloat = -205.0
     @IBAction func colorPickerPan(sender: UIPanGestureRecognizer) {
         if sender.state == .Began {
             startConstant = colorPickerConstraint.constant
         }
-        let distance = sender.translationInView(self.view).y
+        var distance = sender.translationInView(self.view).y
+        if distance == 0.0 { distance += 0.001 }
         let curvedDistance = (-100 * pow(distance, 6)) / (pow(distance, 6) + 10000 * pow(distance, 4)) * -(distance / abs(distance))
         colorPickerConstraint.constant = startConstant - curvedDistance
-        println(distance)
+        if sender.state == .Ended {
+            var newConstant : CGFloat
+            var dampening : CGFloat
+            if curvedDistance < 0 { //pulled up
+                newConstant = resting
+                dampening = 0.3
+            } else { //pulled down
+                newConstant = -415.0
+                dampening = 1.0
+            }
+            colorPickerConstraint.constant = newConstant
+            UIView.animateWithDuration(0.5, delay: 0, usingSpringWithDamping: dampening, initialSpringVelocity: 0, options: nil, animations: {
+                self.view.layoutIfNeeded()
+            }, completion: nil)
+        }
+    }
+    
+    
+    @IBAction func pullUpColorPicker(sender: AnyObject) {
+        colorPickerConstraint.constant = resting
+        UIView.animateWithDuration(0.5, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0, options: nil, animations: {
+            self.view.layoutIfNeeded()
+        }, completion: nil)
+    }
+    
+    
+    func colorPickerListener(notification : NSNotification) {
+        if let color = notification.object as? UIColor {
+            userBackgroundColor = color
+            playerView.backgroundColor = color
+        }
     }
     
     
@@ -987,7 +1027,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             if editSession != nil {
                 let session = editSession!
                 playerController!.player.pause()
-                session.export()
+                session.export(backgrondColor: userBackgroundColor)
             }
         }
     }
