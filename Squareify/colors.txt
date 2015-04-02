@@ -1,18 +1,18 @@
+3D3D3D Black Board
+3D3D6D Titanic
+3D6740 Chalk Board
+683E40 Cool Pants
+0C5C39 Sea Weed
+43C2E0 Atlantis
+E4DEE0 Pearl
+BCDABA Algae
+E9C271 Sun Burst
 70B5DA Baby
 70B517 Lucky
 FAB5BF Piglet
 003CC1 Quirky
 FF3C00 Panic
-0C5C39 Sea weed
-43C2E0 Atlantis
-E4DEE0 Pearl
-BCDABA Algae
-E9C271 Sunburst
 FAFF4C Canary
 FF6921 Atomic
-3D3D3D Black board
-3D3D6D Blue board
-3D6740 Green board
-683E40 Red board
 BFBFC0 Stone
 FFFFFF Finish

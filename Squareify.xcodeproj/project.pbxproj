@@ -126,15 +126,15 @@
 			children = (
 				2E3299821A6318AC00991FD3 /* Main.storyboard */,
 				2E3E65201A7F07CE004D9F55 /* SquareifyController.swift */,
+				2EF9F0CF1AB653FB009AE4C2 /* EditSession.swift */,
 				2E74538A1A9A589E00D0A819 /* PlayerView.swift */,
 				2EDC8A731A7B0CC40085EE38 /* PickerCell.swift */,
+				449E88C01ACC5DFA0034955B /* ColorCollection.swift */,
 				2E89AC2E1A8D70A30006F9E3 /* TimelineHandle.swift */,
-				2EF9F0CF1AB653FB009AE4C2 /* EditSession.swift */,
 				2E32997E1A6318AC00991FD3 /* AppDelegate.swift */,
 				2E3299851A6318AC00991FD3 /* Images.xcassets */,
 				2E3299871A6318AC00991FD3 /* LaunchScreen.xib */,
 				2E32997C1A6318AC00991FD3 /* Supporting Files */,
-				449E88C01ACC5DFA0034955B /* ColorCollection.swift */,
 			);
 			path = Squareify;
 			sourceTree = "<group>";

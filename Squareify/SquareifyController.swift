@@ -53,6 +53,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBOutlet var editorPinch: UIPinchGestureRecognizer!
     @IBOutlet var editorPan: UIPanGestureRecognizer!
     
+    @IBOutlet weak var colorPickerConstraint: NSLayoutConstraint!
     
     var fetch : PHFetchResult?
     let imageManager = PHImageManager()
@@ -96,7 +97,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             //change title view
             let titleView = UILabel(frame: CGRectMake(0, 0, 100, 200))
             titleView.textAlignment = NSTextAlignment.Center
-            titleView.text = "Choose a video"
+            titleView.text = "Choose a video" 
             titleView.textColor = UIColor.whiteColor()
             titleView.font = UIFont(name: "STHeitiSC-Medium", size: 21)
             navigationItem.titleView = titleView
@@ -846,6 +847,18 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
             previousRotate = 0
         }
         saveEditorTransform()
+    }
+    
+    var startConstant : CGFloat = 0.0
+    let resting : CGFloat = -205.0
+    @IBAction func colorPickerPan(sender: UIPanGestureRecognizer) {
+        if sender.state == .Began {
+            startConstant = colorPickerConstraint.constant
+        }
+        let distance = sender.translationInView(self.view).y
+        let curvedDistance = (-100 * pow(distance, 6)) / (pow(distance, 6) + 10000 * pow(distance, 4)) * -(distance / abs(distance))
+        colorPickerConstraint.constant = startConstant - curvedDistance
+        println(distance)
     }
     
     
