@@ -169,13 +169,13 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     func selectAndDisplay(selectionIndex: NSIndexPath) {
         //swap selected cell
         if let previousIndex = currentSelected {
-            let previousCell = pickerCollection.cellForItemAtIndexPath(previousIndex) as PickerCell?
+            let previousCell = pickerCollection.cellForItemAtIndexPath(previousIndex) as! PickerCell?
             previousCell?.deselectCell()
         } else { //this is the first video selected
             nextBarButton.enabled = true
         }
         
-        let currentCell = pickerCollection.cellForItemAtIndexPath(selectionIndex) as PickerCell?
+        let currentCell = pickerCollection.cellForItemAtIndexPath(selectionIndex) as! PickerCell?
         if currentCell == nil {
             return
         }
@@ -229,8 +229,8 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         //setup embeded viewer
-        if segue.identifier? == "embedViewer" {
-            playerController = (segue.destinationViewController as AVPlayerViewController)
+        if segue.identifier == "embedViewer" {
+            playerController = (segue.destinationViewController as! AVPlayerViewController)
             playerView.givePlayerController(playerController!)
             playerController!.showsPlaybackControls = false
         }
@@ -241,7 +241,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         playerMuted = !playerMuted
         AVAudioSession.sharedInstance().setCategory(playerMuted ? AVAudioSessionCategoryAmbient : AVAudioSessionCategoryPlayback, error: nil)
         muteButton.setImage(UIImage(named: (playerMuted ? "mute" : "unmute-filled")), forState: UIControlState.Normal)
-        if let player = playerController?.player? {
+        if let player = playerController?.player {
             player.volume = playerMuted ? 0 : 1
         }
     }
@@ -267,7 +267,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PickerCell", forIndexPath: indexPath) as PickerCell
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PickerCell", forIndexPath: indexPath) as! PickerCell
         
         let index = indexPath.indexAtPosition(1)
         if let asset = fetch?.objectAtIndex(index) as? PHAsset {
@@ -527,7 +527,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
                     //animate in handles when left image in on screen
                     if frame == count - 1 {
                         //bring handles' nonSelectionView to front of timeline after images are presented
-                        if let (right, left) = self.timelineHandles? {
+                        if let (right, left) = self.timelineHandles {
                             right.addNonSelectionView()
                             left.addNonSelectionView()
                         }
@@ -540,7 +540,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     
     func animateInHandles() {
-        if let (right, left) = self.timelineHandles? {
+        if let (right, left) = self.timelineHandles {
             for handle in [right, left] {
                 let originalPos = handle.frame.origin
                 let startPos = CGPointMake(originalPos.x, originalPos.y + handle.frame.height)
@@ -622,7 +622,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         let panLoc = pan.locationInView(durationEditor)
         
         if pan.state == .Began {
-            if let (leftHandle, rightHandle) = self.timelineHandles? {
+            if let (leftHandle, rightHandle) = self.timelineHandles {
                 if self.isTouch(pan.locationInView(leftHandle), inView: leftHandle, withPadding: 25) {
                     grabbedHandle = leftHandle
                 }
@@ -794,6 +794,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     var previousScale : CGFloat = 1
     @IBAction func editorPinch(sender: UIPinchGestureRecognizer) {
+        return
         if sender.state == UIGestureRecognizerState.Began {
             previousScale = 1
         }
@@ -814,6 +815,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     var previousTranslation : CGPoint = CGPointMake(0, 0)
     @IBAction func editorPan(sender: UIPanGestureRecognizer) {
+        return
         if sender.state == .Began {
             previousTranslation = CGPointMake(0, 0)
         }
@@ -835,7 +837,6 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     var previousRotate : CGFloat = 0
     @IBAction func editorRotate(sender: UIRotationGestureRecognizer) {
-        return
         if sender.state == .Began {
             previousRotate = 0
         }
@@ -935,7 +936,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     //retreive images from videos
     func getImageFromCurrentSelectionAtTime(time: CMTime, exact: Bool) -> UIImage? {
         if let currentSelection = currentAsset() {
-            let assetTrack = (currentSelection.tracksWithMediaType(AVMediaTypeVideo).first as AVAssetTrack)
+            let assetTrack = (currentSelection.tracksWithMediaType(AVMediaTypeVideo).first as! AVAssetTrack)
             let transformedDims = CGSizeApplyAffineTransform(assetTrack.naturalSize, assetTrack.preferredTransform)
             //from experimentation, a negative width value in the transformed dims means the image will need to be rotated
             let orientation: UIImageOrientation = (transformedDims.width < 0 ? .Right : .Up)
@@ -953,7 +954,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     
     func getCorrectedAssetSize(asset: AVAsset) -> CGSize {
-        let track = asset.tracksWithMediaType(AVMediaTypeVideo)[0] as AVAssetTrack
+        let track = asset.tracksWithMediaType(AVMediaTypeVideo)[0] as! AVAssetTrack
         let naturalSize = track.naturalSize
         let transform = track.preferredTransform
         let rect = CGRectMake(0, 0, naturalSize.width, naturalSize.height)
@@ -969,14 +970,14 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     func currentAssetTrack() -> AVAssetTrack? {
         if let currentAsset = currentAsset() {
-            return (currentAsset.tracksWithMediaType(AVMediaTypeVideo).first as AVAssetTrack)
+            return (currentAsset.tracksWithMediaType(AVMediaTypeVideo).first as! AVAssetTrack)
         }
         return nil
     }
     
     
     func changeViewTitleTo(title: String, duration: NSTimeInterval) {
-        if let titleView = self.navigationItem.titleView? as? UILabel {
+        if let titleView = self.navigationItem.titleView as? UILabel {
             UIView.animateWithDuration(duration/2, animations: {
                 titleView.alpha = 0
                 }, completion: { success in

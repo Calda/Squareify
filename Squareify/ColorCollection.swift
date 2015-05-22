@@ -94,7 +94,7 @@ class ColorCollection : UIViewController, UICollectionViewDataSource, UICollecti
         var identifier = ""
         if indexPath.item % 2 == 0 { identifier = "color_top" }
         else { identifier = "color_bottom" }
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(identifier, forIndexPath: indexPath) as ColorCell
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(identifier, forIndexPath: indexPath) as! ColorCell
         let configString = colorConfig[indexPath.item]
         let splits = split(configString) {$0 == " "}
         let hex = splits[0]

@@ -30,7 +30,7 @@ class EditSession {
     
     
     func export(backgrondColor : UIColor = UIColor.blackColor()) {
-        let track = asset.tracksWithMediaType(AVMediaTypeVideo)[0] as AVAssetTrack
+        let track = asset.tracksWithMediaType(AVMediaTypeVideo)[0] as! AVAssetTrack
         let correctedSize = getCorrectedAssetSize(asset)
         let composition = AVMutableVideoComposition()
         composition.frameDuration = CMTimeMake(1, 30)
@@ -41,10 +41,6 @@ class EditSession {
         
         let transformer = AVMutableVideoCompositionLayerInstruction(assetTrack: track)
         var preferred = track.preferredTransform
-        if correctedSize == track.naturalSize { //no adjustments
-            //preferred.ty = (correctedSize.height - correctedSize.width) / -2
-        }
-        
         
         let ratioPreviewToExport = previewSize.width / composition.renderSize.width
         
@@ -52,23 +48,26 @@ class EditSession {
             let time = CMTimeMakeWithSeconds(time64, 1000)
             let frame = edits[time64]!
             
-            let adjustedForPreferred = CGAffineTransformConcat(preferred, frame)
+            let adjustedForPreferred = negatePreferred(preferred, forFrame: frame, ofSize: correctedSize)
             
             //fix translation
             let scale = xscale(adjustedForPreferred)
             var txActual = (frame.tx / ratioPreviewToExport) - adjustedForPreferred.tx
             var tyActual = (frame.ty / ratioPreviewToExport) - adjustedForPreferred.ty
             
+            /*
             //fix scale
             txActual += (correctedSize.width - scale * correctedSize.width) / 2
             tyActual += (correctedSize.width - scale * correctedSize.height) / 2
+            */
             
             //fix rotation
-            let angle = theta(adjustedForPreferred)
-            let offset = calculateRotationOffset(angle, height: correctedSize.height, width: correctedSize.width)
-            println("(\(offset.x), \(offset.y))")
-            txActual -= offset.x
-            txActual -= offset.y
+            //let angle = theta(adjustedForPreferred)
+            //let offset = calculateRotationOffset(angle, height: correctedSize.height, width: correctedSize.width)
+            let offset = calculateRotationOffset(adjustedForPreferred)
+            //println("(\(offset.x), \(offset.y))")
+            txActual += (offset.x - 1.0) * correctedSize.width
+            tyActual += offset.y * correctedSize.width
             
             let fixed = CGAffineTransformTranslate(adjustedForPreferred, txActual / scale, tyActual / scale)
             
@@ -79,8 +78,8 @@ class EditSession {
         instruction.backgroundColor = backgrondColor.CGColor
         composition.instructions = [instruction]
         
-        let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as NSString
-        let exportURL = NSURL.fileURLWithPath(documentsPath.stringByAppendingFormat("/editedVideo.mp4"))
+        let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! NSString
+        let exportURL = NSURL.fileURLWithPath(documentsPath.stringByAppendingFormat("/editedVideo.mp4") as String)
         
         let fileManager = NSFileManager.defaultManager()
         fileManager.removeItemAtPath(exportURL!.path!, error: nil)
@@ -93,6 +92,7 @@ class EditSession {
             dispatch_async(dispatch_get_main_queue(), {
                 UISaveVideoAtPathToSavedPhotosAlbum(exportURL!.path!, nil, nil, nil)
                 println("saved")
+                println(exporter.error)
             })
         })
     }
@@ -106,7 +106,24 @@ class EditSession {
         return atan2(t.b, t.a)
     }
     
-    func calculateRotationOffset(angle: CGFloat, height: CGFloat, width: CGFloat) -> CGPoint{
+    
+    func negatePreferred(preferred: CGAffineTransform, forFrame frame: CGAffineTransform, ofSize size: CGSize) -> CGAffineTransform {
+        let rotated = CGAffineTransformConcat(preferred, frame)
+        let preferredRotation = theta(preferred) * CGFloat(180.0 / M_PI)
+        if preferredRotation == 90.0 {
+            return CGAffineTransformTranslate(rotated, 0, -size.width)
+        }
+        if preferredRotation == 180.0 {
+            return CGAffineTransformTranslate(rotated, -size.width, -size.height)
+        }
+        if preferredRotation == 270.0 {
+            return CGAffineTransformTranslate(rotated, -size.width, -(size.height - size.width))
+        }
+        return rotated
+    }
+    
+    
+    func calculateRotationOffset(angle: CGFloat, height: CGFloat, width: CGFloat) -> CGPoint {
         var thetaUnclamped = Double(angle)
         if thetaUnclamped < 0 {
             thetaUnclamped = (2 * M_PI) - thetaUnclamped
@@ -138,9 +155,13 @@ class EditSession {
         return CGPointMake(CGFloat(x), CGFloat(y))
     }
     
+    func calculateRotationOffset(transform: CGAffineTransform) -> CGPoint {
+        return CGPointMake(transform.a, transform.b)
+    }
+    
     
     func getCorrectedAssetSize(asset: AVAsset) -> CGSize {
-        let track = asset.tracksWithMediaType(AVMediaTypeVideo)[0] as AVAssetTrack
+        let track = asset.tracksWithMediaType(AVMediaTypeVideo)[0] as! AVAssetTrack
         let naturalSize = track.naturalSize
         let transform = track.preferredTransform
         let rect = CGRectMake(0, 0, naturalSize.width, naturalSize.height)

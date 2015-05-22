@@ -11,7 +11,7 @@ import AVKit
 
 class PlayerView: UIView {
 
-    let heightConstraint : NSLayoutConstraint!
+    var heightConstraint : NSLayoutConstraint!
     var playerController : AVPlayerViewController?
     func givePlayerController(controller: AVPlayerViewController) {
         playerController = controller
