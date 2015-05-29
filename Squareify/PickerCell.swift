@@ -34,4 +34,13 @@ class PickerCell: UICollectionViewCell {
             }, completion: nil)
     }
     
+    func playAppearAnimation() {
+        self.layer.transform = CATransform3DMakeAffineTransform(CGAffineTransformMakeScale(0.0, 0.0))
+        let fullScale = CATransform3DMakeAffineTransform(CGAffineTransformMakeScale(1.0, 1.0))
+        UIView.animateWithDuration(0.5, delay: 0.0, usingSpringWithDamping: 1.0, initialSpringVelocity: 0.0, options: nil, animations: {
+            self.layer.transform = fullScale
+            self.alpha = 1.0
+        }, completion: nil)
+    }
+    
 }

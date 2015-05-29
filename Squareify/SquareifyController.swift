@@ -150,6 +150,9 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     
     func displayVideoThumbnails(){
+        
+        let startCount = (fetch != nil ? fetch!.count : 0)
+        
         let videoOptions = PHFetchOptions()
         videoOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
         fetch = PHAsset.fetchAssetsWithMediaType(PHAssetMediaType.Video, options: videoOptions)
@@ -159,6 +162,18 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         else {
             noVideosMessage.hidden = true
             self.automaticallyAdjustsScrollViewInsets = false
+            
+            if startCount != 0 && currentSelected != nil {
+                let selection = currentSelected!.item
+                let difference = fetch!.count - startCount
+                let newIndex = selection + difference
+                if newIndex >= 0 && newIndex < fetch!.count {
+                    currentSelected = NSIndexPath(forItem: selection + difference, inSection: 0)
+                } else {
+                    currentSelected = nil
+                }
+            }
+            
             pickerCollection.reloadData()
         }
     }
@@ -201,7 +216,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
         //move selection to center of new frame
         let cellHeight = currentCell!.frame.height
         let scrollTo = currentCell!.frame.origin.y - cellHeight/2
-        let scrollToClamped = min(max(0, scrollTo), pickerCollection.contentSize.height - pickerCollection.frame.height)
+        let scrollToClamped = max(min(max(0, scrollTo), pickerCollection.contentSize.height - pickerCollection.frame.height), 0)
         let offset = CGPointMake(0, scrollToClamped)
         UIView.animateWithDuration(0.45, animations: {
             self.pickerCollection.contentOffset = offset
@@ -268,12 +283,18 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PickerCell", forIndexPath: indexPath) as! PickerCell
+        cell.alpha = 0.0
         
         let index = indexPath.indexAtPosition(1)
         if let asset = fetch?.objectAtIndex(index) as? PHAsset {
             imageManager.requestImageForAsset(asset, targetSize: cell.frame.size, contentMode: PHImageContentMode.AspectFill, options: nil, resultHandler: { result, info in
                 cell.thumbnail.image = result
                 cell.duration = asset.duration
+                if self.currentSelected == nil {
+                    cell.playAppearAnimation()
+                } else {
+                    cell.alpha = 1.0
+                }
             })
         }
         
@@ -323,7 +344,7 @@ class SquareifyController : UIViewController, UICollectionViewDataSource, UIColl
     @IBAction func pickedPanned(sender: UIPanGestureRecognizer) {
         let touchY = sender.locationInView(playerView).y
         if touchY < playerView.frame.height || playerAttachedToGesture {
-            playerView.preferHeight(touchY, duration: 0, dampening: 1)
+            playerView.preferHeight(touchY + playerView.heightOffset, duration: 0, dampening: 1)
             pickerCollection.scrollEnabled = false
             playerAttachedToGesture = true
             playerController?.player?.pause()

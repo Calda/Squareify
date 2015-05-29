@@ -18,7 +18,7 @@ class PlayerView: UIView {
     }
     
     private var preferedHeight : CGFloat = 0
-    private var heightOffset : CGFloat = 0
+    var heightOffset : CGFloat = 0
     var shouldShrink = true
     var REQUIRED_OFFEST : CGFloat = 0
     private var ignoreRequired = false
